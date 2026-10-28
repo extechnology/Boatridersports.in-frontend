@@ -29,10 +29,15 @@ export const RefreshTokenApi = async () => {
 
 // check login status
 export const CheckLoginStatusApi = async () => {
-
-    return await CommonApi("GET", `/auth/check-login/`);
-
-}
+    try {
+        return await CommonApi("GET", `/auth/check-login/`);
+    } catch (error: any) {
+        if (error?.status === 401 || error?.response?.status === 401) {
+            return { is_logged_in: false, user: null };
+        }
+        throw error;
+    }
+};
 
 
 

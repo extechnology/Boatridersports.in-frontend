@@ -13,24 +13,20 @@ import MobileDrawer from './MobileDrawer';
 import { useTheme } from "@/context/ThemeContext";
 import SearchModal from './SearchModal';
 import { useGetCartList } from '@/service/cart/useCart';
-
-
-
-
+import { useCheckLogin } from '@/service/auth/useAuth';
 
 export default function Header() {
 
-
   const { isHeaderDark } = useTheme();
-
 
   const pathname = usePathname();
   const isHome = pathname === "/" || pathname === "/events" || pathname === "/contact" || pathname === "/about";
 
+  // Check login status
+  const { data: authData } = useCheckLogin();
 
-
-  // Get cart data from API
-  const { data: cartData, isLoading } = useGetCartList();
+  // Get cart data from API only if logged in
+  const { data: cartData, isLoading } = useGetCartList({ enabled: !!authData?.is_logged_in });
 
 
 

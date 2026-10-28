@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AddToCartApi, DeleteAllCartItemsApi, DeleteCartItemApi, GetCartListApi, UpdateCartItemApi, CartCheckoutApi, VerifyOrderPaymentApi, GetOrderDetailsApi } from "./CartApi";
 import { CartResponse, UserOrder } from "./types";
+import { CreateOrderRequest, VerifyOrderRequest } from "@/service/order/types";
+export { useUserOrders, useOrderDetail, useCreateRazorpayOrder, useVerifyRazorpayPayment } from "@/service/order/useOrder";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
     if (typeof error === "object" && error !== null && "message" in error) {
@@ -15,7 +17,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 
 
 // Get Cart List
-export const useGetCartList = () => {
+export const useGetCartList = (options?: { enabled?: boolean }) => {
     return useQuery<CartResponse>({
 
         queryKey: ["cart-list"],
@@ -27,6 +29,7 @@ export const useGetCartList = () => {
         },
 
         staleTime: 0,
+        ...options,
 
     });
 
@@ -189,56 +192,31 @@ export const useDeleteAllCartItems = () => {
 
 // Cart Checkout
 export const useCartCheckout = () => {
-
-
-
     return useMutation({
-
-        mutationFn: async (data: FormData) => {
-
+        mutationFn: async (data: CreateOrderRequest | FormData) => {
             return await CartCheckoutApi(data);
-
         },
-
         onError: (error: unknown) => {
-
             toast.error(getErrorMessage(error, "Failed to checkout"));
-
         }
-
     });
-
 };
-
-
 
 // Verify Order Payment
 export const useVerifyOrderPayment = () => {
-
     const queryClient = useQueryClient();
 
     return useMutation({
-
-        mutationFn: async (data: FormData) => {
-
+        mutationFn: async (data: VerifyOrderRequest | FormData) => {
             return await VerifyOrderPaymentApi(data);
-
         },
-
         onSuccess: () => {
-
             queryClient.invalidateQueries({ queryKey: ["cart-list"] });
             queryClient.invalidateQueries({ queryKey: ["user-orders"] });
             toast.success("Order placed successfully!");
-
         },
-
         onError: (error: unknown) => {
-
             toast.error(getErrorMessage(error, "Failed to verify payment"));
-
         }
-
     });
-
 };

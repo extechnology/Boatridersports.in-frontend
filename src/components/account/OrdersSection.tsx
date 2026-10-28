@@ -11,6 +11,7 @@ import {
     Clock,
     CreditCard,
     BadgePercent,
+    Download,
     Loader2,
     Package,
     RefreshCw,
@@ -338,17 +339,30 @@ export default function OrdersSection() {
                                                     </div>
                                                 </div>
 
-                                                <Link href={`/account/orders/${order.id}`} className="w-full lg:w-auto">
-                                                    <motion.button
-                                                        type="button"
-                                                        whileHover={{ scale: 1.03 }}
-                                                        whileTap={{ scale: 0.97 }}
-                                                        className="w-full lg:w-auto px-6 py-3 bg-zinc-950 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-black transition-colors shadow-sm border border-zinc-950"
-                                                    >
-                                                        View Details
-                                                        <ChevronRight className="w-4 h-4" />
-                                                    </motion.button>
-                                                </Link>
+                                                <div className="flex flex-col sm:flex-row items-center gap-2 w-full lg:w-auto">
+                                                    {order.invoice && (
+                                                        <a
+                                                            href={order.invoice}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="w-full sm:w-auto px-4 py-3 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors text-sm"
+                                                        >
+                                                            <Download className="w-4 h-4" />
+                                                            Invoice
+                                                        </a>
+                                                    )}
+                                                    <Link href={`/account/orders/${order.id}`} className="w-full sm:w-auto">
+                                                        <motion.button
+                                                            type="button"
+                                                            whileHover={{ scale: 1.03 }}
+                                                            whileTap={{ scale: 0.97 }}
+                                                            className="w-full sm:w-auto px-6 py-3 bg-zinc-950 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-black transition-colors shadow-sm border border-zinc-950 text-sm"
+                                                        >
+                                                            View Details
+                                                            <ChevronRight className="w-4 h-4" />
+                                                        </motion.button>
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
                                     </motion.article>

@@ -7,6 +7,16 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "pv0smzkc-8000.inc1.devtunnels.ms",
+        pathname: "/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.devtunnels.ms",
+        pathname: "/media/**",
+      },
+      {
+        protocol: "https",
         hostname: "tgg4qp85-8000.inc1.devtunnels.ms",
         pathname: "/media/**",
       },

@@ -11,12 +11,11 @@ import { UserAddress } from '@/service/profile/types';
 import AddressFormModal from '@/components/account/AddressFormModal';
 import ProductLoading from '@/app/loading';
 import { toast } from 'sonner';
-import { useCartCheckout } from '@/service/cart/useCart';
-import { load } from "@cashfreepayments/cashfree-js";
-
-
-
-
+import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCheckLogin } from '@/service/auth/useAuth';
+import { handleRazorpayCheckout } from '@/service/order/razorpayService';
+import { extractImageUrl, extractColorName } from '@/lib/orderUtils';
 
 // get address icon based on type
 const getAddressIcon = (type: string) => {
@@ -30,32 +29,25 @@ const getAddressIcon = (type: string) => {
     }
 };
 
-
 export default function CheckoutPage() {
+    const router = useRouter();
+    const queryClient = useQueryClient();
 
-
+    // User Data for prefill
+    const { data: authData } = useCheckLogin();
 
     // Cart Data
     const { data: cartData, isLoading: isCartLoading, isError: isCartError } = useGetCartList();
 
-
-
     // Address Data
     const { data: addresses, isLoading: isAddressesLoading } = useGetAddresses();
     const deleteMutation = useDeleteAddress();
-
-
-    // Cart Checkout Api
-    const { mutate: checkoutMutation, isPending: isCheckoutPending } = useCartCheckout();
-
 
     const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [selectedEditAddress, setSelectedEditAddress] = useState<UserAddress | undefined>(undefined);
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
     const [isCheckingOut, setIsCheckingOut] = useState(false);
-
-
 
     // Initial selected address
     if (!selectedAddressId && addresses && addresses.length > 0) {
@@ -65,15 +57,12 @@ export default function CheckoutPage() {
         }
     }
 
-
     // Handle Add Address
     const handleAddAddress = () => {
         setSelectedEditAddress(undefined);
         setModalMode('add');
         setIsAddressModalOpen(true);
     };
-
-
 
     const handleEditAddress = (address: UserAddress, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -82,8 +71,6 @@ export default function CheckoutPage() {
         setIsAddressModalOpen(true);
     };
 
-
-
     const handleDeleteAddress = (unique_id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         if (window.confirm("Are you sure you want to delete this address?")) {
@@ -91,65 +78,45 @@ export default function CheckoutPage() {
         }
     };
 
-
-
-    // Handle Proceed to Payment
+    // Handle Proceed to Payment with Razorpay
     const handleProceedToPayment = async () => {
-
-
         if (!selectedAddressId) {
-            toast.error("Please select a delivery address.")
+            toast.error("Please select a delivery address.");
+            return;
+        }
+
+        if (isCheckingOut) {
             return;
         }
 
         setIsCheckingOut(true);
 
-        const formData = new FormData();
-        formData.append("address_id", selectedAddressId);
-
-
-        // Make the API call For Create Order
-        checkoutMutation(formData, {
-
-
-            onSuccess: async (response: any) => {
-
-
-                const sessionId = response?.data?.payment_session_id || response?.payment_session_id;
-
-
-                if (sessionId) {
-
-                    try {
-
-                        const cashfree = await load({
-                            mode: "sandbox",
-                        });
-
-
-                        let checkoutOptions = {
-                            paymentSessionId: sessionId,
-                            redirectTarget: "_self",
-                        };
-
-                        cashfree.checkout(checkoutOptions)
-
-                    } catch (err) {
-
-                        toast.error("Failed to load payment gateway");
-
-                    }
-
-                } else {
-
-                    toast.error("Invalid payment session data received.");
-
-                }
-            }
-
+        await handleRazorpayCheckout({
+            addressId: selectedAddressId,
+            currency: 'INR',
+            user: {
+                username: authData?.user?.username,
+                email: authData?.user?.email,
+                phone: authData?.user?.phone,
+            },
+            onSuccess: (orderId) => {
+                setIsCheckingOut(false);
+                toast.success("Payment verified successfully!");
+                // Invalidate cart and user orders
+                queryClient.invalidateQueries({ queryKey: ["cart-list"] });
+                queryClient.invalidateQueries({ queryKey: ["user-orders"] });
+                // Navigate to order success page
+                router.push(`/order-success?order_id=${encodeURIComponent(orderId)}`);
+            },
+            onError: (errorMessage) => {
+                setIsCheckingOut(false);
+                toast.error(errorMessage);
+            },
+            onDismiss: () => {
+                setIsCheckingOut(false);
+                toast.info("Payment cancelled.");
+            },
         });
-
-
     };
 
 
@@ -348,58 +315,39 @@ export default function CheckoutPage() {
                                         const price = product?.is_discount ? Number(product?.discount_price) : Number(product?.price);
 
 
-                                        let imageUrl = product?.featured_image;
-
+                                        let imageUrl = extractImageUrl(product?.featured_image);
 
                                         if (item?.bike && item?.color?.bike_images?.[0]) {
-
-                                            imageUrl = item?.color?.bike_images?.[0];
-
+                                            imageUrl = extractImageUrl(item.color.bike_images[0]) || imageUrl;
                                         } else if (item?.accessory && item?.accessory?.accessory_images?.[0]) {
-
-                                            imageUrl = item?.accessory?.accessory_images?.[0];
-
+                                            imageUrl = extractImageUrl(item.accessory.accessory_images[0]) || imageUrl;
                                         }
 
+                                        const colorLabel = extractColorName(item?.color?.color ?? item?.color);
+                                        const sizeLabel = typeof item?.size?.size === 'string' ? item.size.size : (item?.size ? String(item.size) : null);
 
                                         return (
-
                                             <div key={item?.id} className="flex gap-4 py-4 border-b border-gray-100 last:border-0 last:pb-0">
-
                                                 <div className="w-20 h-20 rounded-xl bg-gray-50 overflow-hidden shrink-0">
-
                                                     {imageUrl ? (
-
                                                         <img src={imageUrl} alt={product?.name} className="w-full h-full object-cover" />
-
                                                     ) : (
-
                                                         <div className="w-full h-full flex items-center justify-center text-gray-300">
                                                             <ShoppingBag className="w-6 h-6" />
                                                         </div>
-
                                                     )}
-
                                                 </div>
 
                                                 <div className="flex-1 min-w-0 flex flex-col justify-center">
-
                                                     <h3 className="font-bold text-gray-900 text-sm line-clamp-1 mb-1">{product?.name}</h3>
-
                                                     <div className="flex gap-2 text-xs text-gray-500 mb-2">
-
                                                         <span>Qty: {item?.quantity}</span>
-                                                        {item?.size && <span>• Size: {item?.size?.size}</span>}
-                                                        {item?.color && <span>• Color: {item?.color?.color}</span>}
-
+                                                        {sizeLabel && <span>• Size: {sizeLabel}</span>}
+                                                        {colorLabel && <span>• Color: {colorLabel}</span>}
                                                     </div>
-
                                                     <div className="font-bold text-gray-900">₹{(price * item?.quantity).toLocaleString()}</div>
-
                                                 </div>
-
                                             </div>
-
                                         );
 
                                     })}

@@ -35,11 +35,11 @@ export const getOrderStatusColor = (status?: string) => {
         case "pending":
             return "bg-amber-50 text-amber-700 border-amber-200";
         case "processing":
-            return "bg-orange-50 text-orange-700 border-orange-200";
+            return "bg-blue-50 text-blue-700 border-blue-200";
         case "shipped":
-            return "bg-violet-50 text-violet-700 border-violet-200";
+            return "bg-purple-50 text-purple-700 border-purple-200";
         case "delivered":
-            return "bg-green-100 text-green-800 border-green-300";
+            return "bg-emerald-50 text-emerald-800 border-emerald-300";
         case "cancelled":
             return "bg-rose-50 text-rose-700 border-rose-200";
         case "failed":
@@ -60,24 +60,24 @@ export const getOrderStatusAccent = (status?: string) => {
             };
         case "processing":
             return {
-                rail: "bg-orange-500",
-                icon: "bg-orange-100 text-orange-700",
-                panel: "bg-orange-50 border-orange-200",
-                text: "text-orange-700",
+                rail: "bg-blue-500",
+                icon: "bg-blue-100 text-blue-700",
+                panel: "bg-blue-50 border-blue-200",
+                text: "text-blue-700",
             };
         case "shipped":
             return {
-                rail: "bg-violet-500",
-                icon: "bg-violet-100 text-violet-700",
-                panel: "bg-violet-50 border-violet-200",
-                text: "text-violet-700",
+                rail: "bg-purple-500",
+                icon: "bg-purple-100 text-purple-700",
+                panel: "bg-purple-50 border-purple-200",
+                text: "text-purple-700",
             };
         case "delivered":
             return {
-                rail: "bg-green-500",
-                icon: "bg-green-100 text-green-800",
-                panel: "bg-green-100 border-green-300",
-                text: "text-green-800",
+                rail: "bg-emerald-500",
+                icon: "bg-emerald-100 text-emerald-800",
+                panel: "bg-emerald-50 border-emerald-300",
+                text: "text-emerald-800",
             };
         case "cancelled":
             return {
@@ -213,17 +213,87 @@ export const getDeliveredAt = (order: UserOrder) => {
     return order.deliverd_at ? formatOrderDate(order.deliverd_at) : null;
 };
 
+// Safely extract string URL from an image item (string or { image: string })
+export const extractImageUrl = (image: unknown): string | null => {
+    if (!image) return null;
+    if (typeof image === "string") {
+        const trimmed = image.trim();
+        return trimmed.length > 0 ? trimmed : null;
+    }
+    if (typeof image === "object" && image !== null) {
+        if ("image" in image) {
+            const nested = (image as { image?: unknown }).image;
+            if (typeof nested === "string" && nested.trim().length > 0) {
+                return nested.trim();
+            }
+        }
+        if ("url" in image) {
+            const nested = (image as { url?: unknown }).url;
+            if (typeof nested === "string" && nested.trim().length > 0) {
+                return nested.trim();
+            }
+        }
+    }
+    return null;
+};
+
+// Safely extract color label whether it's a string or an object like { color_name: "..." }
+export const extractColorName = (color: unknown): string | null => {
+    if (!color) return null;
+    if (typeof color === "string") return color.trim();
+    if (typeof color === "object" && color !== null) {
+        const obj = color as Record<string, unknown>;
+        if (typeof obj.color_name === "string" && obj.color_name.trim().length > 0) {
+            return obj.color_name.trim();
+        }
+        if (typeof obj.color === "string" && obj.color.trim().length > 0) {
+            return obj.color.trim();
+        }
+        if (typeof obj.color === "object" && obj.color !== null) {
+            return extractColorName(obj.color);
+        }
+        if (typeof obj.name === "string" && obj.name.trim().length > 0) {
+            return obj.name.trim();
+        }
+    }
+    return null;
+};
+
+// Safely extract size label whether it's string or object
+export const extractSizeName = (size: unknown): string | null => {
+    if (!size) return null;
+    if (typeof size === "string") return size.trim();
+    if (typeof size === "number") return String(size);
+    if (typeof size === "object" && size !== null) {
+        const obj = size as Record<string, unknown>;
+        if (typeof obj.size === "string" && obj.size.trim().length > 0) {
+            return obj.size.trim();
+        }
+        if (typeof obj.name === "string" && obj.name.trim().length > 0) {
+            return obj.name.trim();
+        }
+    }
+    return null;
+};
+
 export const getOrderItemDisplay = (item: OrderProduct) => {
     const product = item.bike ?? item.accessory;
-    const bikeImage = item.color?.bike_images?.[0] ?? item.bike?.featured_image ?? item.bike?.bike_colors?.[0]?.bike_images?.[0];
-    const accessoryImage = item.accessory?.accessory_images?.[0];
+
+    // Resolve bike image (color variant -> featured -> first color variant)
+    const bikeColorImage = extractImageUrl(item.color?.bike_images?.[0]);
+    const bikeFeaturedImage = extractImageUrl(item.bike?.featured_image);
+    const bikeFallbackImage = extractImageUrl(item.bike?.bike_colors?.[0]?.bike_images?.[0]);
+    const bikeImage = bikeColorImage ?? bikeFeaturedImage ?? bikeFallbackImage;
+
+    // Resolve accessory image
+    const accessoryImage = extractImageUrl(item.accessory?.accessory_images?.[0]);
 
     return {
         name: product?.name ?? "Product unavailable",
         image: bikeImage ?? accessoryImage ?? null,
         type: item.bike ? "Bike" : "Accessory",
-        color: item.color?.color,
-        size: item.size?.size,
+        color: extractColorName(item.color?.color ?? item.color),
+        size: extractSizeName(item.size?.size ?? item.size),
         price: formatCurrency(item.price),
         subtotal: formatCurrency(item.subtotal),
         quantity: item.quantity,

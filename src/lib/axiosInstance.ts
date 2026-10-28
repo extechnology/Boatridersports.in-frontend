@@ -17,9 +17,11 @@ const onRefreshed = (token?: string) => {
 
 
 
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/+$/, "");
+
 // Axios instance
 const axiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+    baseURL: API_BASE_URL,
     withCredentials: true,
 });
 
@@ -28,7 +30,15 @@ const axiosInstance = axios.create({
 
 // 🧩 Request Interceptor
 axiosInstance.interceptors.request.use(
-    (config) => config,
+    (config) => {
+        if (typeof window !== "undefined") {
+            const token = localStorage.getItem("access_token");
+            if (token && !config.headers.Authorization) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        }
+        return config;
+    },
     (error) => Promise.reject(error)
 );
 
@@ -43,7 +53,21 @@ axiosInstance.interceptors.response.use(
 
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        const requestUrl = originalRequest?.url || "";
+        const isAuthEndpoint =
+            requestUrl.includes("/auth/check-login") ||
+            requestUrl.includes("/auth/login") ||
+            requestUrl.includes("/auth/register") ||
+            requestUrl.includes("/auth/token/refresh") ||
+            requestUrl.includes("/auth/verify-otp") ||
+            requestUrl.includes("/auth/resend-otp") ||
+            requestUrl.includes("/auth/google-auth");
+
+        const wasLoggedIn =
+            typeof window !== "undefined" &&
+            (localStorage.getItem("is_logged_in") === "true" || !!localStorage.getItem("access_token"));
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint && wasLoggedIn) {
 
             originalRequest._retry = true;
 
@@ -62,7 +86,7 @@ axiosInstance.interceptors.response.use(
 
                 // 🔄 Try refresh token
                 await axios.post(
-                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/token/refresh/`,
+                    `${API_BASE_URL}/auth/token/refresh/`,
                     {},
                     { withCredentials: true }
                 );
@@ -78,14 +102,16 @@ axiosInstance.interceptors.response.use(
                 isRefreshing = false;
                 onRefreshed();
 
+                if (typeof window !== "undefined") {
+                    localStorage.removeItem("is_logged_in");
+                    localStorage.removeItem("access_token");
+                    localStorage.setItem("logout", Date.now().toString());
+                }
+
                 toast.error("Session expired", {
                     description: "Please log in again.",
                     duration: 5000,
                 });
-
-                // Trigger logout sync across tabs
-                localStorage.setItem("logout", Date.now().toString());
-                
 
                 return Promise.reject(refreshError);
 

@@ -18,9 +18,16 @@ export const useLogin = () => {
             return await UserLoginApi(data);
         },
 
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
+            if (typeof window !== "undefined") {
+                localStorage.setItem("is_logged_in", "true");
+                if (data?.access_token) {
+                    localStorage.setItem("access_token", data.access_token);
+                }
+            }
             toast.success(data?.message || "Login successful!");
             queryClient.invalidateQueries({ queryKey: ["check-login"] });
+            queryClient.invalidateQueries({ queryKey: ["cart-list"] });
         },
 
         onError: (error: any) => {
@@ -42,11 +49,16 @@ export const useLogout = () => {
         mutationFn: async () => {
             return await UserLogoutApi();
         },
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
             toast.success(data?.message || "Logged out successfully!");
+            if (typeof window !== "undefined") {
+                localStorage.removeItem("is_logged_in");
+                localStorage.removeItem("access_token");
+                localStorage.setItem("logout", Date.now().toString());
+            }
             queryClient.setQueryData(["check-login"], null);
             queryClient.invalidateQueries({ queryKey: ["check-login"] });
-            localStorage.setItem("logout", Date.now().toString());
+            queryClient.invalidateQueries({ queryKey: ["cart-list"] });
         },
         onError: (error: any) => {
             toast.error(error?.message || "Logout failed, please try again.");
@@ -65,9 +77,15 @@ export const useCheckLogin = () => {
         queryKey: ["check-login"],
 
         queryFn: async () => {
-
-            return await CheckLoginStatusApi() as AuthResponse;
-
+            const data = (await CheckLoginStatusApi()) as AuthResponse;
+            if (typeof window !== "undefined") {
+                if (data?.is_logged_in) {
+                    localStorage.setItem("is_logged_in", "true");
+                } else {
+                    localStorage.removeItem("is_logged_in");
+                }
+            }
+            return data;
         },
 
         retry: false, // Do not retry on 401
@@ -164,9 +182,16 @@ export const useGoogleAuth = () => {
             return await GoogleAuthApi(data);
         },
 
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
+            if (typeof window !== "undefined") {
+                localStorage.setItem("is_logged_in", "true");
+                if (data?.access_token) {
+                    localStorage.setItem("access_token", data.access_token);
+                }
+            }
             toast.success(data?.message || "Google Login successful!");
             queryClient.invalidateQueries({ queryKey: ["check-login"] });
+            queryClient.invalidateQueries({ queryKey: ["cart-list"] });
         },
 
         onError: (error: any) => {

@@ -11,7 +11,7 @@ import ProductLoading from '../loading';
 
 
 
-export default function CartPage() {
+function CartContent() {
 
 
     // Get cart data from API
@@ -127,10 +127,7 @@ export default function CartPage() {
     if (allProducts?.length === 0) {
 
         return (
-
-            <AuthProtectedRoute>
-
-                <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-50 pt-20 pb-8">
+            <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-50 pt-20 pb-8">
 
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 
@@ -157,7 +154,6 @@ export default function CartPage() {
                         </motion.div>
                     </div>
                 </div>
-            </AuthProtectedRoute>
         );
     }
 
@@ -166,11 +162,7 @@ export default function CartPage() {
 
 
     return (
-
-
-        <AuthProtectedRoute>
-
-            <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-50 pt-14 pb-8">
+        <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-50 pt-14 pb-8">
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -507,6 +499,13 @@ export default function CartPage() {
                     </div>
                 </div>
             </div>
+    );
+}
+
+export default function CartPage() {
+    return (
+        <AuthProtectedRoute>
+            <CartContent />
         </AuthProtectedRoute>
     );
 }

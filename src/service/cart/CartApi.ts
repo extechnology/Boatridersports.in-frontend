@@ -50,24 +50,20 @@ export const DeleteAllCartItemsApi = async () => {
 
 
 
-//Cart checkout Api
-export const CartCheckoutApi = async (data: FormData) => {
+import { CreateRazorpayOrderApi, VerifyRazorpayOrderApi, GetUserOrdersApi } from "@/service/order/OrderApi";
+import { CreateOrderRequest, VerifyOrderRequest } from "@/service/order/types";
 
-    return await CommonApi("POST", `/order/create-order/`, data);
+// Cart checkout Api (Razorpay)
+export const CartCheckoutApi = async (data: CreateOrderRequest | FormData) => {
+    return await CreateRazorpayOrderApi(data);
+};
 
-}
-
-
-
-// Verify Order Payment
-export const VerifyOrderPaymentApi = async (data: FormData) => {
-
-    return await CommonApi("POST", `/order/verify-order/`, data);
-
-}
-
+// Verify Order Payment (Razorpay)
+export const VerifyOrderPaymentApi = async (data: VerifyOrderRequest | FormData) => {
+    return await VerifyRazorpayOrderApi(data);
+};
 
 // Get Order Details
 export const GetOrderDetailsApi = async () => {
-    return await CommonApi("GET", `/order/user-orders/`);
-}
+    return await GetUserOrdersApi();
+};

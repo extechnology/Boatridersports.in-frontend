@@ -5,50 +5,23 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import ProductLoading from "@/app/loading";
 
-
-
-
-
 export default function AuthProtectedRoute({ children }: { children: React.ReactNode }) {
-
-
     const { data, isLoading } = useCheckLogin();
     const router = useRouter();
     const pathname = usePathname();
 
+    const isLoggedIn = Boolean(data?.is_logged_in);
 
     useEffect(() => {
-
-        if (!isLoading && !data?.is_logged_in) {
-
+        if (!isLoading && !isLoggedIn) {
             router.push(`/account/login?redirect=${encodeURIComponent(pathname)}`);
-
         }
+    }, [isLoading, isLoggedIn, router, pathname]);
 
-    }, [isLoading, data, router, pathname]);
-
-
-
-    // loading screen
-    if (isLoading) {
-
-        return (
-
-            <ProductLoading />
-
-        );
-
+    // Show loading while checking auth status or while redirecting unauthorized users
+    if (isLoading || !isLoggedIn) {
+        return <ProductLoading />;
     }
-
-
-
-    if (!data) {
-
-        return null; // Let the useEffect handle the redirect
-
-    }
-
 
     return <>{children}</>;
-
 }

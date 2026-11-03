@@ -145,7 +145,7 @@ export default function AboutClient() {
                             transition={{ delay: 0.4, duration: 0.6 }}
                             className="absolute -bottom-8 -right-8 md:bottom-12 md:-right-12 bg-white p-6 md:p-8 rounded-2xl shadow-xl max-w-xs border border-gray-100 hidden md:block"
                         >
-                            <p className="text-4xl font-bold text-red-600 mb-2">15+</p>
+                            <p className="text-4xl font-bold text-red-600 mb-2">10+</p>
                             <p className="text-gray-600 font-medium">Years of excellence in servicing and selling premium bikes.</p>
                         </motion.div>
 
@@ -165,7 +165,7 @@ export default function AboutClient() {
                         </motion.h2>
 
                         <motion.p variants={fadeInUp} className="text-lg text-gray-600 mb-6 leading-relaxed text-justify">
-                            Boatrider is a trusted dealer and distributor of premium bicycles and bikes with over 15 years of industry experience. Built on passion, performance, and perseverance, Boatrider stands for quality, reliability, and customer satisfaction. What began as a focused initiative to deliver world-class bicycles has grown into a complete destination for riders of all ages and skill levels.
+                            Boatrider is a trusted dealer and distributor of premium bicycles and bikes with over 10 years of industry experience. Built on passion, performance, and perseverance, Boatrider stands for quality, reliability, and customer satisfaction. What began as a focused initiative to deliver world-class bicycles has grown into a complete destination for riders of all ages and skill levels.
                         </motion.p>
 
                         <motion.p variants={fadeInUp} className="text-lg text-gray-600 mb-8 leading-relaxed text-justify">
@@ -290,7 +290,7 @@ export default function AboutClient() {
 
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed text-justify">
                                     <p>
-                                        “Over the last 15 years, Boatrider has been driven by one simple principle—deliver the best, without compromise. Every bicycle or bike that carries our name reflects our commitment to quality, safety, and customer satisfaction. We have witnessed the cycling culture grow and evolve, and we are proud to be a part of that journey.”
+                                        “Over the last 10 years, Boatrider has been driven by one simple principle—deliver the best, without compromise. Every bicycle or bike that carries our name reflects our commitment to quality, safety, and customer satisfaction. We have witnessed the cycling culture grow and evolve, and we are proud to be a part of that journey.”
                                     </p>
 
                                     <p>

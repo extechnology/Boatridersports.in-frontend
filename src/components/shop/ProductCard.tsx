@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { Loader2, ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { useState } from "react";
 import { getBadgeStyle } from "@/hooks/badge";
 import Link from "next/link";
@@ -34,6 +34,7 @@ export default function ProductCard({ product, className, hideAddToCart, height,
     /* ---------------- Variables ---------------- */
     const isBike = product?.product_type === "bike";
     const isOutOfStock = product?.is_out_of_stock || product?.stock <= 0;
+    const isTrek = product?.brand?.trim().toLowerCase() === "trek" || product?.name?.toLowerCase().includes("trek");
 
 
 
@@ -62,7 +63,7 @@ export default function ProductCard({ product, className, hideAddToCart, height,
         if (isLoading) return;
 
         if (isOutOfStock) {
-            toast.error("This product is currently out of stock");
+            toast.error(isTrek ? "This product is coming soon" : "This product is currently out of stock");
             return;
         }
 
@@ -184,8 +185,8 @@ export default function ProductCard({ product, className, hideAddToCart, height,
 
             {/* ---------------- Discount Badge ---------------- */}
             {isOutOfStock ? (
-                <span className="absolute top-3 right-3 z-20 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow">
-                    OUT OF STOCK
+                <span className={cn("absolute top-3 right-3 z-20 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow", isTrek ? "bg-amber-600" : "bg-red-600")}>
+                    {isTrek ? "COMING SOON" : "OUT OF STOCK"}
                 </span>
             ) : discountPercent > 0 && (
                 <span className="absolute top-3 right-3 z-20 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow">
@@ -311,7 +312,7 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                             disabled
                             className="w-full h-11 flex items-center justify-center gap-2 rounded-full bg-zinc-200 text-zinc-500 font-semibold text-sm cursor-not-allowed"
                         >
-                            Out of Stock
+                            {isTrek ? "Coming Soon" : "Out of Stock"}
                         </button>
 
                     ) : !product?.online_purchase_enabled ? (

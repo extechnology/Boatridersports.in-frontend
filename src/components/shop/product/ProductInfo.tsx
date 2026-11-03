@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, Truck, RotateCcw, Check, ArrowRight, ShoppingCart, Star, Loader2 } from "lucide-react";
+import { Minus, Plus, Truck, RotateCcw, Check, ArrowRight, Star, Loader2 } from "lucide-react";
 import { BikeProduct, AccessoryProduct } from "@/types/product";
 import { getBadgeStyle } from "@/hooks/badge";
 import { AnimatePresence, motion } from "framer-motion";
@@ -42,6 +42,7 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
     const colors = isbike ? product.bike_colors : [];
     const sizes = isbike ? product.sizes : [];
     const isOutOfStock = product.is_out_of_stock || product.stock <= 0;
+    const isTrek = product.brand?.trim().toLowerCase() === "trek" || product.name?.toLowerCase().includes("trek");
 
 
     // State for selected size
@@ -73,7 +74,7 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
         if (isLoading) return;
 
         if (isOutOfStock) {
-            toast.error("This product is currently out of stock");
+            toast.error(isTrek ? "This product is coming soon" : "This product is currently out of stock");
             return;
         }
 
@@ -359,7 +360,7 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
                         <button
                             disabled
                             className="h-14 rounded-full bg-zinc-300 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 font-semibold text-base cursor-not-allowed">
-                            Out of Stock
+                            {isTrek ? "Coming Soon" : "Out of Stock"}
                         </button>
                     </div>
 
@@ -407,14 +408,16 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
 
 
                 {/* Stock Indicator */}
-                <div className="flex items-center gap-2 text-sm justify-center pt-2">
-                    <div className={`w-2 h-2 mt-1 rounded-full ${product.stock === 0 ? "bg-red-500" : product.stock < 10 ? "bg-orange-500 animate-pulse" : "bg-emerald-500"}`} />
+                {isOutOfStock && (
+                    <div className="flex items-center gap-2 text-sm justify-center pt-2">
+                    <div className={`w-2 h-2 mt-1 rounded-full ${isTrek ? "bg-amber-500" : "bg-red-500"}`} />
                     <span
-                        className={`font-medium ${product.stock === 0 ? "text-red-600" : product.stock < 10 ? "text-orange-600" : "text-emerald-600"}`}
+                        className={`font-medium ${isTrek ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}
                     >
-                        {product.stock === 0 ? "Out of Stock" : product.stock < 10 ? `Hurry! Only ${product.stock} left in stock` : "In Stock & Ready to Ship"}
+                        {isTrek ? "Coming Soon" : "Out of Stock"}
                     </span>
                 </div>
+                )}
 
             </div>
 

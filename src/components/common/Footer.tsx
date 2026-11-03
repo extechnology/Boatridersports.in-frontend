@@ -22,8 +22,8 @@ function XIcon({ className, ...props }: React.ComponentProps<'svg'>) {
 
 // Social Links
 const SOCIAL_LINKS = [
-  { name: 'Facebook', icon: Facebook, href: '#' },
-  { name: 'Instagram', icon: Instagram, href: '#' },
+  { name: 'Facebook', icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100085300244397' },
+  { name: 'Instagram', icon: Instagram, href: 'https://www.instagram.com/boatridersports_official?dlrf=bGo4c2QybDgwOHg4' },
   { name: 'X', icon: XIcon, href: '#' },
   { name: 'YouTube', icon: Youtube, href: '#' },
 ];
@@ -35,6 +35,7 @@ const QUICK_LINKS = [
   { name: 'Bikes', href: '/shop/bikes' },
   { name: 'Accessories', href: '/shop/accessories' },
   { name: 'About Us', href: '/about' },
+  { name: 'Events', href: '/events' },
   { name: 'Contact', href: '/contact' },
 ];
 
@@ -96,6 +97,8 @@ export default function Footer() {
                 <motion.a
                   key={idx}
                   href={social.href}
+                  target={social.href !== '#' ? '_blank' : undefined}
+                  rel={social.href !== '#' ? 'noopener noreferrer' : undefined}
                   aria-label={social.name}
                   whileHover={{ scale: 1.1, color: '#ef4444' }}
                   className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"

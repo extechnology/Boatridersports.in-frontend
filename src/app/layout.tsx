@@ -118,7 +118,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 "Boat Rider delivers premium bicycles, expert service, and a passionate cycling community since 1974.",
               sameAs: [
                 "https://twitter.com/boatrider",
-                "https://instagram.com/boatrider"
+                "https://www.facebook.com/profile.php?id=100085300244397",
+                "https://www.instagram.com/boatridersports_official?dlrf=bGo4c2QybDgwOHg4"
               ]
             }),
           }}

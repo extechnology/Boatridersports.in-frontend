@@ -2,16 +2,30 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Facebook, Instagram, Twitter, Youtube, Mail, MapPin, Phone } from 'lucide-react';
+import { Facebook, Instagram, Youtube, Mail, MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
+
+function XIcon({ className, ...props }: React.ComponentProps<'svg'>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
 
 
 // Social Links
 const SOCIAL_LINKS = [
-  { icon: Facebook, href: '#' },
-  { icon: Instagram, href: '#' },
-  { icon: Twitter, href: '#' },
-  { icon: Youtube, href: '#' },
+  { name: 'Facebook', icon: Facebook, href: '#' },
+  { name: 'Instagram', icon: Instagram, href: '#' },
+  { name: 'X', icon: XIcon, href: '#' },
+  { name: 'YouTube', icon: Youtube, href: '#' },
 ];
 
 
@@ -82,6 +96,7 @@ export default function Footer() {
                 <motion.a
                   key={idx}
                   href={social.href}
+                  aria-label={social.name}
                   whileHover={{ scale: 1.1, color: '#ef4444' }}
                   className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
                 >

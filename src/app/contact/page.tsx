@@ -15,9 +15,9 @@ export const metadata: Metadata = {
 
   metadataBase: new URL(siteUrl),
 
-  title: "Contact Us | Premium Bicycles & Cycling Community Since 1974",
+  title: "Contact Us | Premium Bicycles & Cycling Community Since 2017",
 
-  description: "Boat Rider has been delivering premium bicycles, expert service, and a passionate cycling community since 1974. Discover our mission, team, and values.",
+  description: "Boat Rider has been delivering premium bicycles, expert service, and a passionate cycling community since 2017. Discover our mission, team, and values.",
 
   applicationName: "Boat Rider",
 

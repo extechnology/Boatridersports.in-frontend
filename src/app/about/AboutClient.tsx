@@ -244,7 +244,7 @@ export default function AboutClient() {
                                 <img
                                     src="/2670x1780.jpg.jpeg"
                                     loading="lazy"
-                                    alt="Chairman Vision"
+                                    alt="Sanand V - Chairman Vision"
                                     className="w-full h-full object-cover"
                                 />
 
@@ -252,7 +252,7 @@ export default function AboutClient() {
 
                                 <div className="absolute bottom-10 left-10 right-10">
                                     <p className="text-red-500 font-bold tracking-widest text-sm uppercase mb-2">Leadership</p>
-                                    <h3 className="text-3xl font-bold text-white mb-1">Mr. Sananth</h3>
+                                    <h3 className="text-3xl font-bold text-white mb-1">Sanand V</h3>
                                     <p className="text-gray-300 text-sm font-medium">Chairman of Boatrider</p>
                                 </div>
 

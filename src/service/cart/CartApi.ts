@@ -5,9 +5,23 @@ import { CommonApi } from "@/lib/CommonApi";
 
 // Get Cart List
 export const GetCartListApi = async () => {
+    // If not logged in, return empty cart immediately without firing unnecessary 401 requests
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("access_token");
+        const isLoggedIn = localStorage.getItem("is_logged_in") === "true";
+        if (!token && !isLoggedIn) {
+            return { cart_items: [], total_price: 0, count: 0 };
+        }
+    }
 
-    return await CommonApi("GET", `/cart/user-cart/`);
-
+    try {
+        return await CommonApi("GET", `/cart/user-cart/`);
+    } catch (error: any) {
+        if (error?.status === 401 || error?.response?.status === 401) {
+            return { cart_items: [], total_price: 0, count: 0 };
+        }
+        throw error;
+    }
 }
 
 

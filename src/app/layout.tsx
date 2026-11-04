@@ -113,9 +113,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               name: "Boat Rider",
               url: "https://bot-rider.vercel.app",
               logo: "https://bot-rider.vercel.app/logo.png",
-              foundingDate: "1974",
+              foundingDate: "2017",
               description:
-                "Boat Rider delivers premium bicycles, expert service, and a passionate cycling community since 1974.",
+                "Boat Rider delivers premium bicycles, expert service, and a passionate cycling community since 2017.",
               sameAs: [
                 "https://twitter.com/boatrider",
                 "https://www.facebook.com/profile.php?id=100085300244397",

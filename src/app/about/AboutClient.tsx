@@ -318,7 +318,7 @@ export default function AboutClient() {
 
                 <div className="max-w-7xl mx-auto">
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-6 text-center md:divide-x md:divide-gray-800">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 max-w-5xl mx-auto gap-y-10 gap-x-6 text-center sm:divide-x sm:divide-gray-800">
 
 
                         {/* Bikes Sold */}
@@ -373,23 +373,7 @@ export default function AboutClient() {
                             </div>
                         </div>
 
-
-                        {/* Support */}
-                        <div className="px-2">
-
-                            <div className="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-linear-to-br from-white to-gray-500 mb-2">
-                                24/7
-                            </div>
-
-                            <div className="text-xs sm:text-sm text-gray-400 uppercase tracking-widest">
-                                Support
-                            </div>
-
-                        </div>
-
-
                     </div>
-
 
                 </div>
 
@@ -550,7 +534,7 @@ export default function AboutClient() {
                             — Albert Einstein
                         </p>
 
-                        <Link href="/shop">
+                        <Link href="/events">
                             <button className="group inline-flex items-center gap-3 rounded-full bg-red-600 px-12 py-4 text-base md:text-lg font-semibold text-white shadow-md transition-all duration-300 hover:bg-red-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                                 Start Your Journey
                                 <ArrowRight

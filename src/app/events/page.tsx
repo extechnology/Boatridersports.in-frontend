@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 
     metadataBase: new URL(siteUrl),
 
-    title: "Events | Premium Bicycles & Cycling Community Since 1974",
+    title: "Events | Premium Bicycles & Cycling Community Since 2017",
 
-    description: "Boat Rider has been delivering premium bicycles, expert service, and a passionate cycling community since 1974. Discover our mission, team, and values.",
+    description: "Boat Rider has been delivering premium bicycles, expert service, and a passionate cycling community since 2017. Discover our mission, team, and values.",
 
     applicationName: "Boat Rider",
 
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
 
     openGraph: {
         title: "Events | Boat Rider",
-        description: "Boat Rider has been delivering premium bicycles, expert service, and a passionate cycling community since 1974. Discover our mission, team, and values.",
+        description: "Boat Rider has been delivering premium bicycles, expert service, and a passionate cycling community since 2017. Discover our mission, team, and values.",
         url: `${siteUrl}/events`,
         siteName: "Boat Rider",
         images: [
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     twitter: {
         card: "summary_large_image",
         title: "Events | Boat Rider",
-        description: "Boat Rider has been delivering premium bicycles, expert service, and a passionate cycling community since 1974. Discover our mission, team, and values.",
+        description: "Boat Rider has been delivering premium bicycles, expert service, and a passionate cycling community since 2017. Discover our mission, team, and values.",
         images: [socialImage],
     },
 

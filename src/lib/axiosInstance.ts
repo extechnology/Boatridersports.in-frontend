@@ -61,7 +61,8 @@ axiosInstance.interceptors.response.use(
             requestUrl.includes("/auth/token/refresh") ||
             requestUrl.includes("/auth/verify-otp") ||
             requestUrl.includes("/auth/resend-otp") ||
-            requestUrl.includes("/auth/google-auth");
+            requestUrl.includes("/auth/google-auth") ||
+            requestUrl.includes("/cart/user-cart");
 
         const wasLoggedIn =
             typeof window !== "undefined" &&
@@ -108,10 +109,19 @@ axiosInstance.interceptors.response.use(
                     localStorage.setItem("logout", Date.now().toString());
                 }
 
-                toast.error("Session expired", {
-                    description: "Please log in again.",
-                    duration: 5000,
-                });
+                // Only notify if user is on an authenticated route
+                const pathname = window.location.pathname;
+                const isProtectedRoute =
+                    pathname.startsWith("/checkout") ||
+                    pathname.startsWith("/account/profile") ||
+                    pathname.startsWith("/orders");
+
+                if (isProtectedRoute) {
+                    toast.error("Session expired", {
+                        description: "Please log in again.",
+                        duration: 5000,
+                    });
+                }
 
                 return Promise.reject(refreshError);
 

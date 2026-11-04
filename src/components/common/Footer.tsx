@@ -5,6 +5,32 @@ import { motion } from 'framer-motion';
 import { Facebook, Instagram, Youtube, Mail, MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
 
+
+function LandlineIcon({ className, ...props }: React.ComponentProps<'svg'>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <path d="M18 3H6a3 3 0 0 0-3 3v1a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a3 3 0 0 0-3-3z" />
+      <path d="M5 9l-1.5 9A2 2 0 0 0 5.5 20h13a2 2 0 0 0 2-2L19 9" />
+      <circle cx="8.5" cy="13.5" r="0.75" fill="currentColor" />
+      <circle cx="12" cy="13.5" r="0.75" fill="currentColor" />
+      <circle cx="15.5" cy="13.5" r="0.75" fill="currentColor" />
+      <circle cx="8.5" cy="16.5" r="0.75" fill="currentColor" />
+      <circle cx="12" cy="16.5" r="0.75" fill="currentColor" />
+      <circle cx="15.5" cy="16.5" r="0.75" fill="currentColor" />
+    </svg>
+  );
+}
+
 function XIcon({ className, ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
@@ -87,7 +113,7 @@ export default function Footer() {
             </div>
 
             <p className="text-gray-400 text-sm leading-relaxed max-w-sm text-justify">
-              Innovating the cycling experience since 1974. We believe in the power of the bicycle to change lives.
+              Innovating the cycling experience since 2017. We believe in the power of the bicycle to change lives.
               Designed for riders, by riders.
             </p>
 
@@ -143,7 +169,12 @@ export default function Footer() {
 
               <li className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-red-600 shrink-0" />
-                <a href="tel:04954850666" target='_blank' className="text-white hover:text-red-600 transition-colors">0495 4850666</a>
+                <a href="tel:+919526511511" target='_blank' rel="noopener noreferrer" className="text-white hover:text-red-600 transition-colors">+91 95265 11511</a>
+              </li>
+
+              <li className="flex items-center space-x-3">
+                <LandlineIcon className="w-5 h-5 text-red-600 shrink-0" />
+                <a href="tel:04954850666" target='_blank' rel="noopener noreferrer" className="text-white hover:text-red-600 transition-colors">0495 4850666</a>
               </li>
 
               <li className="flex items-center space-x-3">
@@ -182,11 +213,25 @@ export default function Footer() {
         </div>
 
 
-        {/* Big Typography */}
-        <div className="flex justify-center mb-5 sm:mb-10 select-none pointer-events-none">
-          <h1 className="text-[20vw] sm:text-[18vw] leading-none font-bold text-transparent bg-clip-text bg-linear-to-b from-white/10 to-white/5 tracking-tighter text-center">
-            BoatRider
-          </h1>
+        {/* Big Typography Watermark matching Logo */}
+        <div className="w-full flex justify-center mb-5 sm:mb-10 select-none pointer-events-none px-2 sm:px-4">
+          <div
+            className="w-full max-w-7xl aspect-[1943/250] bg-linear-to-b from-white/12 to-white/4"
+            style={{
+              maskImage: 'url(/boatrider-text.png)',
+              WebkitMaskImage: 'url(/boatrider-text.png)',
+              maskSize: 'contain',
+              WebkitMaskSize: 'contain',
+              maskRepeat: 'no-repeat',
+              WebkitMaskRepeat: 'no-repeat',
+              maskPosition: 'center',
+              WebkitMaskPosition: 'center',
+            }}
+            role="img"
+            aria-label="BOATRIDER"
+          >
+            <span className="sr-only">BOATRIDER</span>
+          </div>
         </div>
 
 

@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { Loader2, ShoppingBag, Phone } from "lucide-react";
+import { Loader2, ShoppingBag } from "lucide-react";
 
 import { useState } from "react";
 import { getBadgeStyle } from "@/hooks/badge";
@@ -13,6 +13,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { useAddToCart } from "@/service/cart/useCart";
 import { createProductEnquiryWhatsAppUrl } from "@/lib/whatsapp";
+import ProductEnquiryModal from "@/components/shop/product/ProductEnquiryModal";
 
 
 
@@ -41,6 +42,7 @@ export default function ProductCard({ product, className, hideAddToCart, height,
     const [hovered, setHovered] = useState(false);
 
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+    const [showEnquiryModal, setShowEnquiryModal] = useState(false);
 
 
     // Get user login status
@@ -318,14 +320,16 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                     ) : !product?.online_purchase_enabled ? (
 
                         <>
-                            {/* Desktop: WhatsApp */}
-                            <motion.a
+                            <motion.button
+                                type="button"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                href={enquiryUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hidden md:flex group relative w-full h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] text-white font-semibold text-sm shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.23)] hover:bg-[#20bd5a] transition-all duration-300 overflow-hidden"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowEnquiryModal(true);
+                                }}
+                                className="group relative w-full h-11 flex items-center justify-center gap-2 rounded-full bg-[#25D366] text-white font-semibold text-sm shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.23)] hover:bg-[#20bd5a] transition-all duration-300 overflow-hidden cursor-pointer"
                             >
                                 <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
                                 <span className="relative z-10 flex items-center gap-2">
@@ -334,21 +338,14 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                                     </svg>
                                     Enquire
                                 </span>
-                            </motion.a>
+                            </motion.button>
 
-                            {/* Mobile: Direct Call */}
-                            <motion.a
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                href="tel:+919526511511"
-                                className="flex md:hidden group relative w-full h-11 items-center justify-center gap-2 rounded-full bg-[#25D366] text-white font-semibold text-sm shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.23)] hover:bg-[#20bd5a] transition-all duration-300 overflow-hidden"
-                            >
-                                <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500" />
-                                <span className="relative z-10 flex items-center gap-2">
-                                    <Phone className="w-4 h-4" />
-                                    Call to Enquire
-                                </span>
-                            </motion.a>
+                            <ProductEnquiryModal
+                                isOpen={showEnquiryModal}
+                                onClose={() => setShowEnquiryModal(false)}
+                                productName={product.name}
+                                enquiryUrl={enquiryUrl}
+                            />
                         </>
 
                     ) : (

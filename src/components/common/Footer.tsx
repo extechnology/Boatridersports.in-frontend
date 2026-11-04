@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Facebook, Instagram, Youtube, Mail, MapPin, Phone } from 'lucide-react';
+import { Facebook, Instagram, Mail, MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
 
 
@@ -50,8 +50,6 @@ function XIcon({ className, ...props }: React.ComponentProps<'svg'>) {
 const SOCIAL_LINKS = [
   { name: 'Facebook', icon: Facebook, href: 'https://www.facebook.com/profile.php?id=100085300244397' },
   { name: 'Instagram', icon: Instagram, href: 'https://www.instagram.com/boatridersports_official?dlrf=bGo4c2QybDgwOHg4' },
-  { name: 'X', icon: XIcon, href: '#' },
-  { name: 'YouTube', icon: Youtube, href: '#' },
 ];
 
 

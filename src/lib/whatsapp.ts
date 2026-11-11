@@ -5,6 +5,7 @@ interface ProductEnquiryMessageParams {
     quantity?: number;
     color?: string;
     size?: string;
+    price?: number;
 }
 
 export const createProductEnquiryWhatsAppUrl = ({
@@ -12,6 +13,7 @@ export const createProductEnquiryWhatsAppUrl = ({
     quantity = 1,
     color,
     size,
+    price,
 }: ProductEnquiryMessageParams) => {
     const messageLines = [
         "Hi Boatrider Sports,",
@@ -21,6 +23,7 @@ export const createProductEnquiryWhatsAppUrl = ({
         `Quantity: ${quantity}`,
         color ? `Color: ${color}` : null,
         size ? `Size: ${size}` : null,
+        price && price > 0 ? `Price: ₹${price.toLocaleString("en-IN")}` : null,
         "",
         "Please share availability, pricing, and purchase details.",
     ].filter(Boolean);

@@ -12,6 +12,11 @@ import { toast } from "sonner";
 import { useAddToCart } from "@/service/cart/useCart";
 import { createProductEnquiryWhatsAppUrl } from "@/lib/whatsapp";
 import ProductEnquiryModal from "./ProductEnquiryModal";
+import {
+    getBikeVariantPricing,
+    getInitialSelectedBikeSize,
+    isVariantOutOfStock,
+} from "@/lib/productPricing";
 
 
 
@@ -22,39 +27,82 @@ interface ProductInfoProps {
     setQuantity: (q: number) => void;
     selectedColorIndex: number;
     setSelectedColorIndex: (index: number) => void;
+    selectedSize?: string;
+    setSelectedSize?: (size: string) => void;
 }
 
 
 
 
-export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex, setSelectedColorIndex }: ProductInfoProps) {
+export function ProductInfo({
+    product,
+    quantity,
+    setQuantity,
+    selectedColorIndex,
+    setSelectedColorIndex,
+    selectedSize: controlledSize,
+    setSelectedSize: setControlledSize,
+}: ProductInfoProps) {
 
 
     const isbike = product.product_type === "bike";
-
-
-
-    // Derived values
-    const price = Number(product.is_discount ? product.discount_price : product.price);
-    const originalPrice = product.is_discount ? Number(product.price) : null;
-    const discountPercent = product.is_discount ? Number(product.discount_percentage) : 0;
-
-
     const colors = isbike ? product.bike_colors : [];
-    const sizes = isbike ? product.sizes : [];
-    const isOutOfStock = product.is_out_of_stock || product.stock <= 0;
     const isTrek = product.brand?.trim().toLowerCase() === "trek" || product.name?.toLowerCase().includes("trek");
 
+    // Size options with variant metadata (falls back cleanly to `sizes` array)
+    const sizeOptions = isbike
+        ? (product.bike_sizes && product.bike_sizes.length > 0
+            ? product.bike_sizes
+            : (product.sizes || []).map((size) => ({
+                  size,
+                  stock: product.stock,
+                  is_out_of_stock: product.is_out_of_stock,
+                  is_available: product.is_available,
+              })))
+        : [];
 
-    // State for selected size
+    // State for selected size (synced with parent when controlled)
     const [showEnquiryModal, setShowEnquiryModal] = useState(false);
-    const [selectedSize, setSelectedSize] = useState(sizes?.length > 0 ? sizes[0] : "");
+    const [internalSize, setInternalSize] = useState(() =>
+        isbike ? getInitialSelectedBikeSize(product) : ""
+    );
+    const selectedSize = controlledSize !== undefined ? controlledSize : internalSize;
+    const setSelectedSize = setControlledSize ?? setInternalSize;
+
+    // Derived size-specific pricing & stock values
+    const pricing = isbike
+        ? getBikeVariantPricing(product, selectedSize)
+        : {
+              currentPrice: Number(product.is_discount && Number(product.discount_price) > 0 ? product.discount_price : product.price) || 0,
+              originalPrice: product.is_discount && Number(product.discount_price) > 0 ? Number(product.price) : null,
+              hasDiscount: Boolean(product.is_discount) && Number(product.discount_price) > 0,
+              discountPercent: product.is_discount ? Number(product.discount_percentage) || 0 : 0,
+              isOutOfStock: Boolean(product.is_out_of_stock) || Number(product.stock ?? 0) <= 0,
+              stockCount: Number(product.stock ?? 0),
+              hasAnyStockAcrossSizes: !Boolean(product.is_out_of_stock) && Number(product.stock ?? 0) > 0,
+          };
+
+    const { currentPrice: price, originalPrice, discountPercent, isOutOfStock, stockCount, hasAnyStockAcrossSizes } = pricing;
+    const isComingSoon = isTrek && !hasAnyStockAcrossSizes;
+    const maxQuantity = product.online_purchase_enabled && !isOutOfStock && stockCount > 0 ? stockCount : undefined;
+
+    const handleSelectSize = (size: string) => {
+        setSelectedSize(size);
+        if (isbike && product.online_purchase_enabled) {
+            const nextPricing = getBikeVariantPricing(product, size);
+            if (!nextPricing.isOutOfStock && nextPricing.stockCount > 0 && quantity > nextPricing.stockCount) {
+                setQuantity(nextPricing.stockCount);
+            }
+        }
+    };
+
     const selectedColor = isbike ? colors?.[selectedColorIndex]?.color : undefined;
     const enquiryUrl = createProductEnquiryWhatsAppUrl({
         productName: product.name,
         quantity,
         color: selectedColor,
         size: selectedSize,
+        price,
     });
 
 
@@ -76,7 +124,13 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
         if (isLoading) return;
 
         if (isOutOfStock) {
-            toast.error(isTrek ? "This product is coming soon" : "This product is currently out of stock");
+            toast.error(
+                isComingSoon
+                    ? "This product is coming soon"
+                    : isbike && selectedSize
+                        ? `Size ${selectedSize} is currently out of stock`
+                        : "This product is currently out of stock"
+            );
             return;
         }
 
@@ -189,24 +243,53 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
                     </div>
                 </div>
 
-                {/* Price */}
-                <div className="space-y-1">
-                    <div className="flex items-center gap-3">
+                {/* Price & Stock Availability */}
+                <div className="space-y-2.5">
+                    <div className="flex items-center gap-3 flex-wrap">
                         <div className="flex items-baseline gap-3">
                             <span className="text-3xl font-semibold text-zinc-900 dark:text-white">
-                                ₹{price.toLocaleString()}
+                                ₹{price.toLocaleString("en-IN")}
                             </span>
                             {originalPrice && (
                                 <span className="text-lg text-zinc-400 line-through font-medium">
-                                    ₹{originalPrice.toLocaleString()}
+                                    ₹{originalPrice.toLocaleString("en-IN")}
                                 </span>
                             )}
                         </div>
 
                         {/* Discount Badge */}
                         {discountPercent > 0 && (
-                            <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">
+                            <span className="bg-emerald-500 text-white px-2.5 py-0.5 rounded-full text-xs font-bold">
                                 -{discountPercent}%
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Stock Availability Badge */}
+                    <div>
+                        {isOutOfStock ? (
+                            isComingSoon ? (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-full">
+                                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                    Coming Soon
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 rounded-full">
+                                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                    {isbike && selectedSize ? `Out of Stock for Size ${selectedSize}` : "Out of Stock"}
+                                </span>
+                            )
+                        ) : stockCount <= 3 ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-full">
+                                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                                {isbike && selectedSize
+                                    ? `Only ${stockCount} left in size ${selectedSize} — order soon!`
+                                    : `Only ${stockCount} left in stock — order soon!`}
+                            </span>
+                        ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-full">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                In Stock
                             </span>
                         )}
                     </div>
@@ -283,7 +366,7 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
                 )}
 
                 {/* Frame Size */}
-                {sizes?.length > 0 && (
+                {sizeOptions.length > 0 && (
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
                             <span className="text-sm font-semibold text-zinc-900 dark:text-white">
@@ -296,22 +379,28 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
                         </div>
 
                         <div className="grid grid-cols-4 gap-3">
-                            {sizes.map((size) => {
-                                const isActive = selectedSize === size;
+                            {sizeOptions.map((item) => {
+                                const isActive = selectedSize === item.size;
+                                const itemOutOfStock = isVariantOutOfStock(item);
 
                                 return (
                                     <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
+                                        key={item.size}
+                                        type="button"
+                                        onClick={() => handleSelectSize(item.size)}
                                         className={cn(
                                             "h-11 rounded-xl border text-sm font-medium transition-all duration-300 hover:cursor-pointer",
                                             "flex items-center justify-center",
                                             isActive
-                                                ? "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black shadow-md scale-105"
-                                                : "border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white hover:scale-105"
+                                                ? itemOutOfStock
+                                                    ? "border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 shadow-sm scale-105 line-through"
+                                                    : "border-black dark:border-white bg-black dark:bg-white text-white dark:text-black shadow-md scale-105"
+                                                : itemOutOfStock
+                                                    ? "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 text-zinc-400 dark:text-zinc-600 line-through hover:border-zinc-300 dark:hover:border-zinc-700"
+                                                    : "border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white hover:scale-105"
                                         )}
                                     >
-                                        {size}
+                                        {item.size}
                                     </button>
                                 );
                             })}
@@ -346,8 +435,9 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
                         <motion.button
                             whileHover={{ scale: 1.15 }}
                             whileTap={{ scale: 0.9 }}
-                            onClick={() => setQuantity(quantity + 1)}
-                            className="relative w-6 h-6 flex items-center justify-center rounded-full bg-black dark:bg-white text-white dark:text-black shadow-lg hover:shadow-xl hover:ring-2 hover:ring-black/20 dark:hover:ring-white/20 transition-all hover:cursor-pointer"
+                            disabled={isOutOfStock || (maxQuantity !== undefined && quantity >= maxQuantity)}
+                            onClick={() => setQuantity(maxQuantity ? Math.min(maxQuantity, quantity + 1) : quantity + 1)}
+                            className="relative w-6 h-6 flex items-center justify-center rounded-full bg-black dark:bg-white text-white dark:text-black shadow-lg hover:shadow-xl hover:ring-2 hover:ring-black/20 dark:hover:ring-white/20 transition-all hover:cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             <Plus className="w-4 h-4" />
                             <span className="absolute inset-0 rounded-full bg-white/10 dark:bg-black/10 opacity-0 hover:opacity-100 transition" />
@@ -362,7 +452,7 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
                         <button
                             disabled
                             className="h-14 rounded-full bg-zinc-300 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400 font-semibold text-base cursor-not-allowed">
-                            {isTrek ? "Coming Soon" : "Out of Stock"}
+                            {isComingSoon ? "Coming Soon" : "Out of Stock"}
                         </button>
                     </div>
 
@@ -395,6 +485,7 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
                                 [
                                     selectedColor ? `Color: ${selectedColor}` : null,
                                     selectedSize ? `Size: ${selectedSize}` : null,
+                                    price > 0 ? `₹${price.toLocaleString("en-IN")}` : null,
                                     `Qty: ${quantity}`,
                                 ].filter(Boolean).join(" • ")
                             }
@@ -420,19 +511,6 @@ export function ProductInfo({ product, quantity, setQuantity, selectedColorIndex
                         </motion.button>
 
                     </div>
-                )}
-
-
-                {/* Stock Indicator */}
-                {isOutOfStock && (
-                    <div className="flex items-center gap-2 text-sm justify-center pt-2">
-                    <div className={`w-2 h-2 mt-1 rounded-full ${isTrek ? "bg-amber-500" : "bg-red-500"}`} />
-                    <span
-                        className={`font-medium ${isTrek ? "text-amber-600 dark:text-amber-400" : "text-red-600 dark:text-red-400"}`}
-                    >
-                        {isTrek ? "Coming Soon" : "Out of Stock"}
-                    </span>
-                </div>
                 )}
 
             </div>

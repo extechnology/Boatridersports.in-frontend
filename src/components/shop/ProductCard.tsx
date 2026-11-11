@@ -14,6 +14,11 @@ import { toast } from "sonner";
 import { useAddToCart } from "@/service/cart/useCart";
 import { createProductEnquiryWhatsAppUrl } from "@/lib/whatsapp";
 import ProductEnquiryModal from "@/components/shop/product/ProductEnquiryModal";
+import {
+    getBikePriceDisplay,
+    getInitialSelectedBikeSize,
+    isBikeAllSizesOutOfStock,
+} from "@/lib/productPricing";
 
 
 
@@ -34,8 +39,11 @@ export default function ProductCard({ product, className, hideAddToCart, height,
 
     /* ---------------- Variables ---------------- */
     const isBike = product?.product_type === "bike";
-    const isOutOfStock = product?.is_out_of_stock || product?.stock <= 0;
+    const isOutOfStock = isBike
+        ? isBikeAllSizesOutOfStock(product)
+        : (product?.is_out_of_stock || Number(product?.stock ?? 0) <= 0);
     const isTrek = product?.brand?.trim().toLowerCase() === "trek" || product?.name?.toLowerCase().includes("trek");
+    const defaultBikeSize = isBike ? getInitialSelectedBikeSize(product) : undefined;
 
 
 
@@ -89,9 +97,9 @@ export default function ProductCard({ product, className, hideAddToCart, height,
 
         if (isBike) {
 
-            if (product.sizes?.length) {
+            if (defaultBikeSize) {
 
-                formData.append("size", product.sizes[0]);
+                formData.append("size", defaultBikeSize);
 
             }
 
@@ -112,18 +120,29 @@ export default function ProductCard({ product, className, hideAddToCart, height,
     /* ---------------- Derived values ---------------- */
     const images = isBike ? product?.bike_colors?.[selectedColorIndex]?.bike_images ?? [] : product?.accessory_images ?? [];
 
-    const price = Number(product?.is_discount ? product?.discount_price : product?.price);
+    const bikePriceDisplay = isBike ? getBikePriceDisplay(product) : null;
+    const price = bikePriceDisplay
+        ? bikePriceDisplay.current
+        : Number(product?.is_discount && Number(product?.discount_price) > 0 ? product?.discount_price : product?.price);
+    const priceLabel = bikePriceDisplay ? bikePriceDisplay.label : `₹${price.toLocaleString("en-IN")}`;
+    const originalPrice = bikePriceDisplay
+        ? bikePriceDisplay.originalPrice
+        : (product?.is_discount && Number(product?.discount_price) > 0 ? Number(product?.price) : null);
+    const discountPercent = bikePriceDisplay
+        ? bikePriceDisplay.discountPercent
+        : (product?.is_discount ? Number(product?.discount_percentage) : 0);
+    const isPriceRange = bikePriceDisplay?.isRange ?? false;
+    const discountBadgeText = discountPercent > 0
+        ? (isPriceRange ? `Up to ${discountPercent}% OFF` : `${discountPercent}% OFF`)
+        : null;
 
-    const originalPrice = product?.is_discount ? Number(product?.price) : null;
-
-    const discountPercent = product?.is_discount ? Number(product?.discount_percentage) : 0;
     const selectedColor = isBike ? product?.bike_colors?.[selectedColorIndex]?.color : undefined;
-    const selectedSize = isBike ? product?.sizes?.[0] : undefined;
     const enquiryUrl = createProductEnquiryWhatsAppUrl({
         productName: product.name,
         quantity: 1,
         color: selectedColor,
-        size: selectedSize,
+        size: defaultBikeSize,
+        price,
     });
 
 
@@ -190,9 +209,9 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                 <span className={cn("absolute top-3 right-3 z-20 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow", isTrek ? "bg-amber-600" : "bg-red-600")}>
                     {isTrek ? "COMING SOON" : "OUT OF STOCK"}
                 </span>
-            ) : discountPercent > 0 && (
+            ) : discountBadgeText && (
                 <span className="absolute top-3 right-3 z-20 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow">
-                    {discountPercent}% OFF
+                    {discountBadgeText}
                 </span>
             )}
 
@@ -245,15 +264,15 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                     {/* Pricing */}
                     <div className="space-y-1">
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
 
                             <span className="text-xl font-black text-zinc-900 dark:text-white">
-                                ₹{price.toLocaleString()}
+                                {priceLabel}
                             </span>
 
-                            {discountPercent > 0 && (
+                            {discountBadgeText && (
                                 <span className="text-xs font-bold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-0.5 rounded-full">
-                                    {discountPercent}% OFF
+                                    {discountBadgeText}
                                 </span>
                             )}
 
@@ -261,7 +280,7 @@ export default function ProductCard({ product, className, hideAddToCart, height,
 
                         {originalPrice && (
                             <span className="text-sm line-through text-zinc-400">
-                                ₹{originalPrice.toLocaleString()}
+                                ₹{originalPrice.toLocaleString("en-IN")}
                             </span>
                         )}
 
@@ -345,6 +364,13 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                                 onClose={() => setShowEnquiryModal(false)}
                                 productName={product.name}
                                 enquiryUrl={enquiryUrl}
+                                productDetails={
+                                    [
+                                        selectedColor ? `Color: ${selectedColor}` : null,
+                                        defaultBikeSize ? `Size: ${defaultBikeSize}` : null,
+                                        priceLabel,
+                                    ].filter(Boolean).join(" • ")
+                                }
                             />
                         </>
 

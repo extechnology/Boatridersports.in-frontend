@@ -6,6 +6,7 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, Loader2, AlertCirc
 import AuthProtectedRoute from '@/components/common/AuthProtectedRoute';
 import { useGetCartList, useUpdateCartItem, useDeleteCartItem, useDeleteAllCartItems } from '@/service/cart/useCart';
 import { CartProduct } from '@/service/cart/types';
+import { getCartItemPricing, isVariantOutOfStock } from '@/lib/productPricing';
 import ProductLoading from '../loading';
 
 
@@ -203,8 +204,7 @@ function CartContent() {
 
                                     if (!product) return null;
 
-                                    const price = product?.is_discount ? Number(product?.discount_price) : Number(product?.price);
-                                    const originalPrice = Number(product?.price);
+                                    const { unitPrice, originalUnitPrice, hasDiscount, discountPercent } = getCartItemPricing(item);
 
                                     let imageUrl = product?.featured_image;
 
@@ -273,16 +273,18 @@ function CartContent() {
                                                             <div className="mb-3">
                                                                 <div className="flex items-center gap-2 flex-wrap">
                                                                     <p className="text-lg md:text-xl font-bold text-gray-900">
-                                                                        ₹{price?.toLocaleString()}
+                                                                        ₹{unitPrice.toLocaleString("en-IN")}
                                                                     </p>
-                                                                    {product?.is_discount && (
+                                                                    {hasDiscount && (
                                                                         <>
                                                                             <p className="text-sm text-gray-400 line-through">
-                                                                                ₹{originalPrice?.toLocaleString()}
+                                                                                ₹{originalUnitPrice.toLocaleString("en-IN")}
                                                                             </p>
-                                                                            <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-bold">
-                                                                                {Number(product?.discount_percentage)}% OFF
-                                                                            </span>
+                                                                            {discountPercent > 0 && (
+                                                                                <span className="px-2 py-0.5 bg-green-100 text-green-700 rounded-md text-xs font-bold">
+                                                                                    {discountPercent}% OFF
+                                                                                </span>
+                                                                            )}
                                                                         </>
                                                                     )}
                                                                 </div>
@@ -308,16 +310,42 @@ function CartContent() {
 
                                                                             <option value="" disabled>Size</option>
 
-                                                                            {item.size && <option value={item.size.size}>{item.size.size || `Size ${item.size.id}`}</option>}
+                                                                            {item.bike.bike_sizes && item.bike.bike_sizes.length > 0 ? (
+                                                                                <>
+                                                                                    {item.size && !item.bike.bike_sizes.some((bs) => bs.size === item.size?.size) && (
+                                                                                        <option value={item.size.size}>{item.size.size || `Size ${item.size.id}`}</option>
+                                                                                    )}
+                                                                                    {item.bike.bike_sizes.map((variant) => {
+                                                                                        const outOfStock = isVariantOutOfStock(variant);
+                                                                                        const isCurrent = variant.size === item?.size?.size;
+                                                                                        return (
+                                                                                            <option
+                                                                                                key={variant.id || variant.size}
+                                                                                                value={variant.size}
+                                                                                                disabled={outOfStock && !isCurrent}
+                                                                                            >
+                                                                                                {variant.size}{outOfStock ? ' (Out of stock)' : ''}
+                                                                                            </option>
+                                                                                        );
+                                                                                    })}
+                                                                                </>
+                                                                            ) : (
+                                                                                <>
+                                                                                    {item.size && <option value={item.size.size}>{item.size.size || `Size ${item.size.id}`}</option>}
 
-                                                                            {item.bike.sizes?.map((sizeObj: any) => {
-                                                                                const sizeId = typeof sizeObj === 'object' ? sizeObj.id : sizeObj;
-                                                                                const sizeStr = typeof sizeObj === 'object' ? (sizeObj.size || sizeObj.name) : sizeObj.toString();
-                                                                                const sizeValue = sizeStr.startsWith('S') || typeof sizeObj === 'object' ? sizeStr : `S${sizeStr}`;
-                                                                                const sizeLabel = typeof sizeObj === 'object' ? (sizeObj.size || sizeObj.name) : `Size ${sizeValue}`;
-                                                                                if (sizeValue === item?.size?.size) return null;
-                                                                                return <option key={sizeId} value={sizeValue}>{sizeLabel}</option>;
-                                                                            })}
+                                                                                    {item.bike.sizes?.map((sizeObj: unknown) => {
+                                                                                        const obj = typeof sizeObj === 'object' && sizeObj !== null
+                                                                                            ? (sizeObj as { id?: string | number; size?: string; name?: string })
+                                                                                            : null;
+                                                                                        const sizeId = obj ? (obj.id ?? obj.size ?? obj.name ?? '') : String(sizeObj ?? '');
+                                                                                        const sizeStr = obj ? (obj.size || obj.name || '') : String(sizeObj ?? '');
+                                                                                        const sizeValue = obj ? sizeStr : (/^\d+$/.test(sizeStr) ? `S${sizeStr}` : sizeStr);
+                                                                                        const sizeLabel = obj ? (obj.size || obj.name || '') : (/^\d+$/.test(sizeStr) ? `Size ${sizeValue}` : sizeStr);
+                                                                                        if (!sizeValue || sizeValue === item?.size?.size) return null;
+                                                                                        return <option key={String(sizeId)} value={sizeValue}>{sizeLabel}</option>;
+                                                                                    })}
+                                                                                </>
+                                                                            )}
 
                                                                         </select>
 
@@ -405,11 +433,16 @@ function CartContent() {
                                                         {/* Item Total */}
                                                         <div className="text-right">
                                                             <p className="text-lg md:text-xl font-bold text-gray-900">
-                                                                ₹{(price * item?.quantity).toLocaleString()}
+                                                                ₹{(unitPrice * item?.quantity).toLocaleString("en-IN")}
                                                             </p>
+                                                            {hasDiscount && (
+                                                                <p className="text-xs text-gray-400 line-through">
+                                                                    ₹{(originalUnitPrice * item?.quantity).toLocaleString("en-IN")}
+                                                                </p>
+                                                            )}
                                                             {item?.quantity > 1 && (
                                                                 <p className="text-xs text-gray-500">
-                                                                    ₹{price?.toLocaleString()} each
+                                                                    ₹{unitPrice.toLocaleString("en-IN")} each
                                                                 </p>
                                                             )}
                                                         </div>

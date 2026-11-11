@@ -8,6 +8,7 @@ import { ProductDetails } from "@/components/shop/product/ProductDetails";
 import { ProductReviews } from "@/components/shop/product/ProductReviews";
 import { YouMayAlsoLike } from "@/components/shop/product/YouMayAlsoLike";
 import { useTheme } from "@/context/ThemeContext";
+import { getInitialSelectedBikeSize } from "@/lib/productPricing";
 
 
 
@@ -57,6 +58,9 @@ export default function ProductClient({ product }: Props) {
 
     // State variables
     const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+    const [selectedSize, setSelectedSize] = useState(() =>
+        isBike ? getInitialSelectedBikeSize(product as BikeProduct) : ""
+    );
     const [selectedImage, setSelectedImage] = useState(getInitialImages()[0]);
     const [quantity, setQuantity] = useState(1);
     const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
@@ -116,6 +120,8 @@ export default function ProductClient({ product }: Props) {
                             setQuantity={setQuantity}
                             selectedColorIndex={selectedColorIndex}
                             setSelectedColorIndex={setSelectedColorIndex}
+                            selectedSize={selectedSize}
+                            setSelectedSize={setSelectedSize}
                         />
                     </div>
 
@@ -151,6 +157,8 @@ export default function ProductClient({ product }: Props) {
                         setQuantity={setQuantity}
                         selectedColorIndex={selectedColorIndex}
                         setSelectedColorIndex={setSelectedColorIndex}
+                        selectedSize={selectedSize}
+                        setSelectedSize={setSelectedSize}
                     />
                 </div>
 

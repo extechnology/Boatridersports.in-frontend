@@ -8,13 +8,13 @@ export interface BaseProduct {
     description: string;
     category: string;
     brand: string;
-    price: string;
+    price: string | number;
     stock: number;
     is_available: boolean;
     is_out_of_stock: boolean;
     is_discount: boolean;
-    discount_price: string;
-    discount_percentage: string;
+    discount_price: string | number;
+    discount_percentage: string | number;
     special_tag: "Best Seller" | "New Arrival" | "Trending" | "Limited";
     is_dark?: boolean;
     background_color: string | null;
@@ -57,6 +57,19 @@ export interface BikeSpecValue {
 }
 
 
+export interface BikeSizeVariant {
+    id: number;
+    size_id: number;
+    size: string;
+    price: string | number;
+    stock: number;
+    is_available: boolean;
+    is_out_of_stock: boolean;
+    is_discount: boolean;
+    discount_price: string | number;
+    discount_percentage: string | number;
+}
+
 export interface BikeProduct extends BaseProduct {
 
     wheel_size: string[];
@@ -73,6 +86,7 @@ export interface BikeProduct extends BaseProduct {
     youtube_video_id: string | null;
 
     sizes: string[];
+    bike_sizes?: BikeSizeVariant[];
 
     bike_colors: BikeColorImage[];
 

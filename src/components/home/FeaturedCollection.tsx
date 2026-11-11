@@ -10,6 +10,7 @@ import { ArrowUpRight, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { motion, useInView, Variants } from "framer-motion";
 import { getBadgeStyle } from "@/hooks/badge";
 import { BikeProduct } from "@/types/product";
+import { getBikePriceDisplay } from "@/lib/productPricing";
 
 // Item animation matching CategorySlider
 const item: Variants = {
@@ -143,9 +144,7 @@ export default function FeaturedCollection({ data }: { data: BikeProduct[] }) {
                             product?.bike_colors?.[0]?.bike_images?.[0] ||
                             "";
 
-                        const price = Number(
-                            product?.is_discount ? product?.discount_price : product?.price
-                        );
+                        const priceDisplay = getBikePriceDisplay(product);
 
                         return (
                             <SwiperSlide key={product?.unique_id || index} className="h-full">
@@ -248,7 +247,7 @@ export default function FeaturedCollection({ data }: { data: BikeProduct[] }) {
                                                 {/* Price & Details Link */}
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-gray-400">
-                                                        ₹{price.toLocaleString("en-IN")}
+                                                        {priceDisplay.label}
                                                     </span>
 
                                                     <div className="pointer-events-auto">

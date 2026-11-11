@@ -1,20 +1,23 @@
+import { BikeSizeVariant } from "@/types/product";
+
 export interface CartItemBike {
     id: number;
     unique_id: string;
     name: string;
     description: string;
     product_type: "bike";
-    price: string;
+    price: string | number;
     stock: number;
     is_available: boolean;
     is_out_of_stock: boolean;
     is_discount: boolean;
-    discount_price: string;
-    discount_percentage: string;
+    discount_price: string | number;
+    discount_percentage: string | number;
     featured_image: string | null;
     brand: string;
     category?: string;
     sizes?: unknown[];
+    bike_sizes?: BikeSizeVariant[];
     bike_colors?: CartItemColor[];
 }
 
@@ -37,13 +40,14 @@ export interface CartItemAccessory {
 }
 
 export interface CartItemSize {
-    id: number;
+    id?: number;
     size: string;
 }
 
 export interface CartItemColor {
-    id: number;
+    id?: number;
     color: string;
+    color_name?: string;
     bike_images?: string[];
     bike?: number;
 }
@@ -56,6 +60,9 @@ export interface CartProduct {
     color?: CartItemColor;
     quantity: number;
     user_cart: number;
+    size_price?: string | number;
+    size_discount_price?: string | number;
+    effective_price?: string | number;
 }
 
 

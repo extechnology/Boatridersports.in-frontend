@@ -16,6 +16,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCheckLogin } from '@/service/auth/useAuth';
 import { handleRazorpayCheckout } from '@/service/order/razorpayService';
 import { extractImageUrl, extractColorName } from '@/lib/orderUtils';
+import { getCartItemPricing } from '@/lib/productPricing';
 
 // get address icon based on type
 const getAddressIcon = (type: string) => {
@@ -312,7 +313,7 @@ export default function CheckoutPage() {
                                         if (!product) return null;
 
 
-                                        const price = product?.is_discount ? Number(product?.discount_price) : Number(product?.price);
+                                        const { unitPrice, originalUnitPrice, hasDiscount } = getCartItemPricing(item);
 
 
                                         let imageUrl = extractImageUrl(product?.featured_image);
@@ -345,7 +346,14 @@ export default function CheckoutPage() {
                                                         {sizeLabel && <span>• Size: {sizeLabel}</span>}
                                                         {colorLabel && <span>• Color: {colorLabel}</span>}
                                                     </div>
-                                                    <div className="font-bold text-gray-900">₹{(price * item?.quantity).toLocaleString()}</div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-gray-900">₹{(unitPrice * item?.quantity).toLocaleString("en-IN")}</span>
+                                                        {hasDiscount && (
+                                                            <span className="text-xs text-gray-400 line-through">
+                                                                ₹{(originalUnitPrice * item?.quantity).toLocaleString("en-IN")}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         );

@@ -15,7 +15,7 @@ export interface BaseProduct {
     is_discount: boolean;
     discount_price: string | number;
     discount_percentage: string | number;
-    special_tag: "Best Seller" | "New Arrival" | "Trending" | "Limited";
+    special_tag?: string | null;
     is_dark?: boolean;
     background_color: string | null;
     text_color: string | null;
@@ -100,13 +100,36 @@ export interface BikeProduct extends BaseProduct {
 
 
 // Accessory Product
-export interface AccessoryProduct extends BaseProduct {
+export interface AccessoryImage {
+    id: number;
+    image: string;
+}
+
+export interface AccessoryProduct extends Omit<BaseProduct, "brand"> {
 
     product_type: "accessories";
+    model_name?: string | null;
+    model_no?: string | null;
+    brand?: string | null;
     sub_category: string;
-    accessory_images: string[];
+    accessory_images: (string | AccessoryImage)[];
+
+    // Specific Filter / Spec Attributes
+    speed?: string | null;
+    tire_type?: string | null;
+    hub_width?: string | null;
+    valve_type?: string | null;
+    size?: string | null;
+    ml?: string | null;
+    color?: string | null;
+    bike_mounted_type?: string | null;
+    material?: string | null;
+    warranty?: string | null;
+    shipping_charge?: string;
 
 }
+
+export type AccessoryItem = AccessoryProduct;
 
 
 
@@ -116,8 +139,8 @@ export interface PaginatedResponse<T> {
     next: string | null;
     previous: string | null;
     results: T[];
-    total_pages: number;
-    current_page: number;
+    total_pages?: number;
+    current_page?: number;
 }
 
 
@@ -128,11 +151,17 @@ export interface BikeSidebarColor {
     code: string[];
 }
 
+export interface MrpRange {
+    min_price: number;
+    max_price: number;
+}
+
 
 export interface BaseSideBar {
     categories: string[];
     brands: string[];
     special_tags: string[];
+    mrp_range?: MrpRange;
 }
 
 
@@ -148,8 +177,44 @@ export interface BikeSidebarResponse extends BaseSideBar {
 
 
 export interface AccessoriesSidebarResponse extends BaseSideBar {
-    sub_categories: string[];
     product_type: "accessories";
+    sub_categories: string[];
+    model_numbers?: string[];
+    model_names?: string[];
+    speeds?: string[];
+    tire_types?: string[];
+    hub_widths?: string[];
+    valve_types?: string[];
+    sizes?: string[];
+    ml?: string[];
+    colors?: string[];
+    bike_mounted_types?: string[];
+    materials?: string[];
+    warranties?: string[];
+}
+
+export type AccessoriesFilterSidebarData = AccessoriesSidebarResponse;
+
+export interface AccessoriesActiveFilterState {
+    search: string;
+    brand: string[];
+    category: string[];
+    sub_category: string[];
+    model_no: string[];
+    model_name: string[];
+    speed: string[];
+    tire_type: string[];
+    hub_width: string[];
+    valve_type: string[];
+    size: string[];
+    ml: string[];
+    color: string[];
+    bike_mounted_type: string[];
+    material: string[];
+    warranty: string[];
+    special_tag: string[];
+    min_price?: number;
+    max_price?: number;
 }
 
 

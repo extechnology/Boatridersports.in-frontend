@@ -224,10 +224,19 @@ export function ProductInfo({
                                 )}
                             </div>
 
-                            {/* Brand */}
-                            <span className="text-sm font-bold uppercase tracking-wider text-zinc-500">
-                                {product.brand}
-                            </span>
+                            {/* Brand & Model */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                                {(product.brand || (!isbike && product.sub_category)) && (
+                                    <span className="text-sm font-bold uppercase tracking-wider text-zinc-500">
+                                        {product.brand || (!isbike ? product.sub_category : "")}
+                                    </span>
+                                )}
+                                {!isbike && (product.model_name || product.model_no) && (
+                                    <span className="text-xs font-mono text-zinc-400">
+                                        {[product.model_name, product.model_no].filter(Boolean).join(" • ")}
+                                    </span>
+                                )}
+                            </div>
                         </div>
 
                         {/* Reviews */}

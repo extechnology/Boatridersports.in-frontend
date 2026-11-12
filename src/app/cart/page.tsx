@@ -7,6 +7,7 @@ import AuthProtectedRoute from '@/components/common/AuthProtectedRoute';
 import { useGetCartList, useUpdateCartItem, useDeleteCartItem, useDeleteAllCartItems } from '@/service/cart/useCart';
 import { CartProduct } from '@/service/cart/types';
 import { getCartItemPricing, isVariantOutOfStock } from '@/lib/productPricing';
+import { extractImageUrl } from '@/lib/orderUtils';
 import ProductLoading from '../loading';
 
 
@@ -212,7 +213,7 @@ function CartContent() {
                                         imageUrl = item.color.bike_images[0];
 
                                     } else if (item?.accessory && item?.accessory?.accessory_images?.[0]) {
-                                        imageUrl = item.accessory.accessory_images[0];
+                                        imageUrl = extractImageUrl(item.accessory.accessory_images[0]);
                                     }
 
 

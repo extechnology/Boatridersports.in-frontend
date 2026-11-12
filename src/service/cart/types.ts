@@ -36,7 +36,7 @@ export interface CartItemAccessory {
     discount_percentage: string;
     featured_image: string | null;
     brand: string;
-    accessory_images?: string[];
+    accessory_images?: (string | { id?: number; image?: string })[];
 }
 
 export interface CartItemSize {

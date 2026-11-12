@@ -1,3 +1,4 @@
+import { buildAccessoriesFilterQuery, parseAccessoriesFiltersFromSearchParams } from "@/lib/accessoriesFilter";
 import ShopClient from "./ShopClient";
 import { serverFetch } from "@/lib/fetcher";
 import { PaginatedResponse, BikeProduct, AccessoryProduct } from "@/types/product";
@@ -5,14 +6,15 @@ import { Metadata } from "next";
 
 
 // Generate metadata for shop page
-export async function generateMetadata({ params, searchParams, }: { params: { slug: "bike" | "accessories" }; searchParams: { [key: string]: string | string[] | undefined }; }): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams, }: { params: Promise<{ slug: "bike" | "accessories" }> | { slug: "bike" | "accessories" }; searchParams: Promise<{ [key: string]: string | string[] | undefined }> | { [key: string]: string | string[] | undefined }; }): Promise<Metadata> {
 
 
     const { slug } = await params;
+    const resolvedSearchParams = await searchParams;
 
 
     const isAccessories = slug === "accessories";
-    const hasFilters = Object?.keys(searchParams || {}).length > 0;
+    const hasFilters = Object?.keys(resolvedSearchParams || {}).length > 0;
 
 
     const title = isAccessories ? "Shop Cycling Accessories | Helmets, Lights & Gear" : "Shop Bikes | Road, Mountain & Electric Bikes";
@@ -86,31 +88,44 @@ export default async function ShopPage({ params, searchParams, }: { params: { sl
 
     Object.entries(resolvedSearchParams).forEach(([key, value]) => {
 
-        if (!value) return;
+        if (!value || key === "type") return;
 
         if (Array.isArray(value)) {
-            value.forEach(v => query.append(key, v));
+            value.forEach(v => {
+                if (v) query.append(key, v);
+            });
             return;
         }
 
-        // 👇 split comma-separated values
+        // Split legacy comma-separated values
         if (typeof value === "string" && value.includes(",")) {
-            value.split(",").forEach(v => query.append(key, v));
+            value.split(",").forEach(v => {
+                const trimmed = v.trim();
+                if (trimmed) query.append(key, trimmed);
+            });
         } else {
             query.append(key, value);
         }
 
     });
 
-
+    const pageParam = Math.max(1, Number(query.get("page")) || 1);
+    const apiQueryString =
+        type === "accessories"
+            ? buildAccessoriesFilterQuery(parseAccessoriesFiltersFromSearchParams(query), pageParam)
+            : (() => {
+                  query.set("type", type);
+                  return query.toString();
+              })();
 
     // Fetch product
     const productsRes = await serverFetch<PaginatedResponse<BikeProduct | AccessoryProduct>>(
-        `/product/products-filtered/?${query}&type=${type}`,
+        `/product/products-filtered/?${apiQueryString}`,
         { cache: "no-store" }
     );
 
-
+    const resolvedCurrentPage = productsRes.current_page ?? pageParam;
+    const resolvedTotalPages = productsRes.total_pages ?? Math.max(1, Math.ceil((productsRes.count || 0) / 15));
 
     return (
 
@@ -118,8 +133,8 @@ export default async function ShopPage({ params, searchParams, }: { params: { sl
             type={type}
             products={productsRes.results}
             totalCount={productsRes.count}
-            currentPage={productsRes.current_page}
-            totalpages={productsRes.total_pages}
+            currentPage={resolvedCurrentPage}
+            totalpages={resolvedTotalPages}
         />
 
     );

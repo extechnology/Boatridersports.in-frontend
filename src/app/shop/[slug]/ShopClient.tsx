@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Filter, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import { Filter, SlidersHorizontal, ArrowUpDown, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import FilterSidebar from "@/components/shop/FilterSidebar";
 import ProductGrid from "@/components/shop/ProductGrid";
@@ -16,6 +16,13 @@ import FilterSidebarError from "@/components/loaders/FilterSidebarError";
 import FilterGlobalLoader from "@/components/loaders/FilterGlobalLoader";
 import { cn } from "@/lib/utils";
 import EmptyProducts from "@/components/shop/EmptyProducts";
+import {
+    ACCESSORY_FILTER_ARRAY_KEYS,
+    BIKE_FILTER_ARRAY_KEYS,
+    FILTER_PARAM_LABELS,
+    formatFilterPrice,
+    getParamValues,
+} from "@/lib/accessoriesFilter";
 
 
 
@@ -53,45 +60,93 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
 
 
 
-    // Sort By
+    // Accessory search & Sort state
+    const isAccessories = type === "accessories";
     const sortBy = searchParams.get("special_tag") || "All";
+    const urlSearchName = searchParams.get("name") || "";
+    const [searchInputState, setSearchInputState] = useState({
+        syncedName: urlSearchName,
+        text: urlSearchName,
+        immediate: false,
+    });
+    const searchValue =
+        searchInputState.syncedName === urlSearchName
+            ? searchInputState.text
+            : urlSearchName;
 
 
 
     /** ---------- URL HELPERS ---------- */
     const updateURL = (params: URLSearchParams, scroll = false) => {
+        const qs = params.toString();
         startTransition(() => {
-            router.push(`${pathname}?${params.toString()}`, { scroll });
+            router.push(qs ? `${pathname}?${qs}` : pathname, { scroll });
         });
     };
 
 
 
-    // Toggle Param
-    const toggleParam = (key: string, value: string) => {
-
-
+    const applySearch = (rawQuery: string) => {
+        const trimmed = rawQuery.trim();
+        setSearchInputState({ syncedName: urlSearchName, text: trimmed, immediate: true });
         const params = new URLSearchParams(searchParams.toString());
+        params.delete("page");
+        if (trimmed) {
+            params.set("name", trimmed);
+        } else {
+            params.delete("name");
+        }
+        updateURL(params);
+    };
+
+    const handleSearchInputChange = (nextValue: string) => {
+        setSearchInputState({ syncedName: urlSearchName, text: nextValue, immediate: false });
+    };
+
+    useEffect(() => {
+        if (!isAccessories || searchInputState.immediate) return;
+        if (searchInputState.syncedName !== urlSearchName) return;
+
+        const trimmed = searchInputState.text.trim();
+        if (trimmed === urlSearchName.trim()) return;
+
+        const timer = setTimeout(() => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete("page");
+            if (trimmed) {
+                params.set("name", trimmed);
+            } else {
+                params.delete("name");
+            }
+            const qs = params.toString();
+            startTransition(() => {
+                router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+            });
+        }, 450);
+
+        return () => clearTimeout(timer);
+    }, [isAccessories, searchInputState, urlSearchName, searchParams, pathname, router]);
 
 
-        const current = params.get(key)?.split(",").filter(Boolean) ?? [];
 
+    // Toggle Param (writes repeating query params & resets pagination to page 1)
+    const toggleParam = (key: string, value: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        const current = getParamValues(searchParams, key);
 
         params.delete("page");
 
-
         const set = new Set(current);
-        set.has(value) ? set.delete(value) : set.add(value);
-
-
-        if (set.size === 0) {
-            params.delete(key);
+        if (set.has(value)) {
+            set.delete(value);
         } else {
-            params.set(key, Array.from(set).join(","));
+            set.add(value);
         }
 
-        updateURL(params);
+        params.delete(key);
+        set.forEach((v) => params.append(key, v));
 
+        updateURL(params);
     };
 
 
@@ -99,17 +154,21 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
 
     // Set price range
     const setRange = (minKey: string, maxKey: string, min: number, max: number) => {
-
         const params = new URLSearchParams(searchParams.toString());
 
         params.set(minKey, String(min));
-
         params.set(maxKey, String(max));
-
         params.delete("page");
 
         updateURL(params);
+    };
 
+    const clearPriceRange = () => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("min_price");
+        params.delete("max_price");
+        params.delete("page");
+        updateURL(params);
     };
 
 
@@ -117,8 +176,8 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
 
     // Handle sort change
     const handleSortChange = (value: string) => {
-
         const params = new URLSearchParams(searchParams.toString());
+        params.delete("page");
 
         if (value === "All") {
             params.delete("special_tag");
@@ -127,30 +186,80 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
         }
 
         updateURL(params);
-
     };
 
 
 
     // Clear all filters
     const clearAllFilters = () => {
-
-        router.push(pathname);
-
+        setSearchInputState({ syncedName: "", text: "", immediate: true });
+        startTransition(() => {
+            router.push(pathname);
+        });
     };
+
+
+
+    // Build active filter pills for display above the grid
+    const activeKeys = isAccessories ? ACCESSORY_FILTER_ARRAY_KEYS : BIKE_FILTER_ARRAY_KEYS;
+    const activeFilterPills: Array<{
+        id: string;
+        label: string;
+        value: string;
+        onRemove: () => void;
+    }> = [];
+
+    if (urlSearchName.trim()) {
+        activeFilterPills.push({
+            id: "search-name",
+            label: "Search",
+            value: urlSearchName.trim(),
+            onRemove: () => applySearch(""),
+        });
+    }
+
+    for (const key of activeKeys) {
+        for (const val of getParamValues(searchParams, key)) {
+            activeFilterPills.push({
+                id: `${key}:${val}`,
+                label: FILTER_PARAM_LABELS[key] || key,
+                value: val,
+                onRemove: () => toggleParam(key, val),
+            });
+        }
+    }
+
+    if (searchParams.has("min_price") || searchParams.has("max_price")) {
+        const fallbackMin = filterData?.mrp_range?.min_price ?? 0;
+        const fallbackMax =
+            filterData?.mrp_range?.max_price ?? (isAccessories ? 50000 : 600000);
+        const minVal =
+            searchParams.get("min_price") !== null
+                ? Number(searchParams.get("min_price"))
+                : fallbackMin;
+        const maxVal =
+            searchParams.get("max_price") !== null
+                ? Number(searchParams.get("max_price"))
+                : fallbackMax;
+
+        activeFilterPills.push({
+            id: "price-range",
+            label: "Price",
+            value: `${formatFilterPrice(minVal)} - ${formatFilterPrice(maxVal)}`,
+            onRemove: clearPriceRange,
+        });
+    }
 
 
 
     // Handle page change
     const handlePageChange = (page: number) => {
-
         if (page < 1 || page > totalpages) return;
 
         const params = new URLSearchParams(searchParams.toString());
         params.set("page", page.toString());
 
         updateURL(params, true);
-
     };
 
 
@@ -220,6 +329,11 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
 
                             <SlidersHorizontal className="w-4 h-4" />
                             Filters
+                            {activeFilterPills.length > 0 && (
+                                <span className="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[11px] font-bold bg-white text-black dark:bg-black dark:text-white">
+                                    {activeFilterPills.length}
+                                </span>
+                            )}
 
                         </Button>
 
@@ -330,6 +444,7 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
 
                                         <FilterSidebar
                                             className="p-2"
+                                            onClose={() => setIsMobileFilterOpen(false)}
                                             categoriesData={filterData}
                                             searchParams={searchParams}
                                             onToggle={toggleParam}
@@ -354,12 +469,49 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
                     <main className="flex-1 mt-4">
 
 
-                        {/* Desktop Sort */}
-                        <div className="hidden lg:flex items-center justify-between mb-5">
-                            <p className="text-sm font-medium text-zinc-500">
-                                Showing <span className="text-black dark:text-white font-bold">{products.length}</span> results
-                            </p>
-                            <div className="flex items-center gap-3">
+                        {/* Accessory Search + Sort Toolbar */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-1">
+                                {isAccessories && (
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            applySearch(searchValue);
+                                        }}
+                                        className="relative w-full sm:max-w-md"
+                                    >
+                                        <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                        <input
+                                            type="text"
+                                            value={searchValue}
+                                            onChange={(e) => handleSearchInputChange(e.target.value)}
+                                            placeholder="Search spares, model name or model no..."
+                                            aria-label="Search accessories"
+                                            className="w-full h-10 pl-10 pr-9 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black/15 dark:focus:ring-white/20 transition"
+                                        />
+                                        {searchValue && (
+                                            <button
+                                                type="button"
+                                                onClick={() => applySearch("")}
+                                                aria-label="Clear search"
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </form>
+                                )}
+
+                                <p className="text-sm font-medium text-zinc-500 whitespace-nowrap">
+                                    Showing <span className="text-black dark:text-white font-bold">{products.length}</span>
+                                    {totalCount > products.length && (
+                                        <> of <span className="text-black dark:text-white font-bold">{totalCount}</span></>
+                                    )}{" "}
+                                    results
+                                </p>
+                            </div>
+
+                            <div className="hidden lg:flex items-center gap-3 shrink-0">
                                 <span className="text-sm font-medium text-zinc-500">Sort by:</span>
                                 <Select value={sortBy} onValueChange={handleSortChange} >
                                     <SelectTrigger className="w-45 bg-transparent border-zinc-200 dark:border-zinc-800 rounded-full">
@@ -376,6 +528,37 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
                                 </Select>
                             </div>
                         </div>
+
+
+                        {/* Active Filter Tags */}
+                        {activeFilterPills.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-2 mb-5 p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200/80 dark:border-zinc-800">
+                                <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 mr-1">
+                                    Active:
+                                </span>
+
+                                {activeFilterPills.map((pill) => (
+                                    <button
+                                        key={pill.id}
+                                        type="button"
+                                        onClick={pill.onRemove}
+                                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-xs font-medium text-zinc-800 dark:text-zinc-200 hover:border-red-400 dark:hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
+                                    >
+                                        <span className="text-zinc-400">{pill.label}:</span>
+                                        <span className="font-semibold">{pill.value}</span>
+                                        <X className="w-3.5 h-3.5 ml-0.5" />
+                                    </button>
+                                ))}
+
+                                <button
+                                    type="button"
+                                    onClick={clearAllFilters}
+                                    className="ml-auto text-xs font-bold text-red-600 dark:text-red-400 hover:underline px-2 py-1 cursor-pointer"
+                                >
+                                    Clear All
+                                </button>
+                            </div>
+                        )}
 
 
                         {/* Product Grid */}

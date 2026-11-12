@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { BikeProduct, AccessoryProduct } from "@/types/product";
 import { ProductVideo } from "./ProductVideo";
 import { ProductPosterSlider } from "./ProductPosterSlider";
+import { getAccessorySpecEntries } from "@/lib/accessoriesFilter";
 
 
 
@@ -28,6 +29,7 @@ export function ProductDetails({ product, activeAccordion, toggleAccordion }: Pr
     const videoId = isBike ? product?.youtube_video_id : null;
     const posters = isBike ? product?.bike_posters : [];
     const specs = isBike ? product?.bike_spec_labels : [];
+    const accessorySpecs = !isBike ? getAccessorySpecEntries(product) : [];
     const downloads = isBike ? product?.bike_downloads : [];
 
 
@@ -72,7 +74,7 @@ export function ProductDetails({ product, activeAccordion, toggleAccordion }: Pr
 
 
                 {/* Technical Specs */}
-                {specs?.length > 0 && (
+                {(isBike ? specs?.length > 0 : accessorySpecs.length > 0) && (
 
                     <div className="border-b border-zinc-200 dark:border-zinc-800">
 
@@ -108,41 +110,59 @@ export function ProductDetails({ product, activeAccordion, toggleAccordion }: Pr
                                     className="overflow-hidden"
                                 >
 
-                                    <div className="pb-8 space-y-10">
+                                    {isBike ? (
+                                        <div className="pb-8 space-y-10">
 
-                                        {specs?.map((spec) => (
+                                            {specs?.map((spec) => (
 
-                                            <div
-                                                key={spec?.label}
-                                                className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4 md:gap-12 border-b border-zinc-200 dark:border-zinc-800 pb-6"
-                                            >
+                                                <div
+                                                    key={spec?.label}
+                                                    className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-4 md:gap-12 border-b border-zinc-200 dark:border-zinc-800 pb-6"
+                                                >
 
-                                                {/* Spec Label */}
-                                                <h4 className="font-bold text-lg text-zinc-900 dark:text-white">
-                                                    {spec?.label}
-                                                </h4>
+                                                    {/* Spec Label */}
+                                                    <h4 className="font-bold text-lg text-zinc-900 dark:text-white">
+                                                        {spec?.label}
+                                                    </h4>
 
 
-                                                {/* Spec Values */}
-                                                <div className="space-y-4">
-                                                    {spec?.bike_spec_values?.map((item) => (
-                                                        <div key={item?.name}>
-                                                            <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                                                                {item?.name}
-                                                            </p>
-                                                            <p className="text-base font-medium text-zinc-900 dark:text-zinc-200 leading-relaxed">
-                                                                {item?.value}
-                                                            </p>
-                                                        </div>
-                                                    ))}
+                                                    {/* Spec Values */}
+                                                    <div className="space-y-4">
+                                                        {spec?.bike_spec_values?.map((item) => (
+                                                            <div key={item?.name}>
+                                                                <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                                                                    {item?.name}
+                                                                </p>
+                                                                <p className="text-base font-medium text-zinc-900 dark:text-zinc-200 leading-relaxed">
+                                                                    {item?.value}
+                                                                </p>
+                                                            </div>
+                                                        ))}
+
+                                                    </div>
 
                                                 </div>
 
-                                            </div>
+                                            ))}
 
-                                        ))}
-
-                                    </div>
+                                        </div>
+                                    ) : (
+                                        <div className="pb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {accessorySpecs.map((spec) => (
+                                                <div
+                                                    key={spec.label}
+                                                    className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/50"
+                                                >
+                                                    <p className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                                                        {spec.label}
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                                                        {spec.value}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
 
                                 </motion.div>
 

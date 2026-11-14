@@ -3,6 +3,7 @@ import ProductClient from "./ProductClient";
 import { BikeProduct, AccessoryProduct } from "@/types/product";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { normalizeImageList } from "@/lib/accessoriesFilter";
 
 
 
@@ -45,7 +46,7 @@ export async function generateMetadata({ params, searchParams }: { params: { id:
     } else {
 
         const accessory = product as AccessoryProduct;
-        imageUrl = accessory.accessory_images[0] || imageUrl;
+        imageUrl = normalizeImageList(accessory.accessory_images)[0] || imageUrl;
 
     }
 

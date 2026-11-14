@@ -9,6 +9,7 @@ import { ProductReviews } from "@/components/shop/product/ProductReviews";
 import { YouMayAlsoLike } from "@/components/shop/product/YouMayAlsoLike";
 import { useTheme } from "@/context/ThemeContext";
 import { getInitialSelectedBikeSize } from "@/lib/productPricing";
+import { normalizeImageList } from "@/lib/accessoriesFilter";
 
 
 
@@ -50,7 +51,7 @@ export default function ProductClient({ product }: Props) {
             return product?.bike_colors?.[0]?.bike_images ?? [];
         }
 
-        return (product as AccessoryProduct)?.accessory_images ?? [];
+        return normalizeImageList((product as AccessoryProduct)?.accessory_images);
 
     };
 
@@ -63,14 +64,18 @@ export default function ProductClient({ product }: Props) {
     );
     const [selectedImage, setSelectedImage] = useState(getInitialImages()[0]);
     const [quantity, setQuantity] = useState(1);
-    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
+    const [activeAccordion, setActiveAccordion] = useState<string | null>(
+        !isBike ? "specs" : null
+    );
 
 
 
     // Effect for updating images when color changes
     useEffect(() => {
 
-        const images = isBike ? product.bike_colors?.[selectedColorIndex]?.bike_images ?? [] : (product as AccessoryProduct)?.accessory_images ?? [];
+        const images = isBike
+            ? product.bike_colors?.[selectedColorIndex]?.bike_images ?? []
+            : normalizeImageList((product as AccessoryProduct)?.accessory_images);
         setSelectedImage(images[0]);
 
     }, [product, selectedColorIndex, isBike]);
@@ -85,7 +90,9 @@ export default function ProductClient({ product }: Props) {
 
 
     // Current images
-    const currentImages = isBike ? product?.bike_colors?.[selectedColorIndex]?.bike_images ?? [] : (product as AccessoryProduct)?.accessory_images ?? [];
+    const currentImages = isBike
+        ? product?.bike_colors?.[selectedColorIndex]?.bike_images ?? []
+        : normalizeImageList((product as AccessoryProduct)?.accessory_images);
 
 
 

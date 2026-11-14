@@ -19,6 +19,7 @@ import {
     getInitialSelectedBikeSize,
     isBikeAllSizesOutOfStock,
 } from "@/lib/productPricing";
+import { getAccessoryCardChips, normalizeImageList } from "@/lib/accessoriesFilter";
 
 
 
@@ -118,7 +119,10 @@ export default function ProductCard({ product, className, hideAddToCart, height,
 
 
     /* ---------------- Derived values ---------------- */
-    const images = isBike ? product?.bike_colors?.[selectedColorIndex]?.bike_images ?? [] : product?.accessory_images ?? [];
+    const images = isBike
+        ? product?.bike_colors?.[selectedColorIndex]?.bike_images ?? []
+        : normalizeImageList(product?.accessory_images);
+    const accessoryChips = !isBike ? getAccessoryCardChips(product, 3) : [];
 
     const bikePriceDisplay = isBike ? getBikePriceDisplay(product) : null;
     const price = bikePriceDisplay
@@ -219,22 +223,36 @@ export default function ProductCard({ product, className, hideAddToCart, height,
 
             {/* ---------------- Image ---------------- */}
             <div
-                className="relative h-80 overflow-hidden"
+                className={cn(
+                    "relative overflow-hidden",
+                    isBike ? "h-80" : "h-72 bg-zinc-50 dark:bg-zinc-900/60"
+                )}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
             >
-                <Link href={`/product/${product.unique_id}?type=${product.product_type}`} aria-label={product.name}>
-
-                    <motion.img
-                        key={hovered ? images?.[1] : images?.[0]}
-                        src={hovered && images?.[1] ? images[1] : images[0]}
-                        alt={product.name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        initial={{ opacity: 0.6, scale: 1.04 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4 }}
-                    />
-
+                <Link
+                    href={`/product/${product.unique_id}?type=${product.product_type}`}
+                    aria-label={product.name}
+                    className="block w-full h-full"
+                >
+                    {images[0] ? (
+                        <motion.img
+                            key={hovered && images[1] ? images[1] : images[0]}
+                            src={hovered && images[1] ? images[1] : images[0]}
+                            alt={product.name}
+                            className={cn(
+                                "absolute inset-0 w-full h-full",
+                                isBike ? "object-cover" : "object-contain p-4"
+                            )}
+                            initial={{ opacity: 0.6, scale: 1.04 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.4 }}
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs font-medium text-zinc-400">
+                            No Image
+                        </div>
+                    )}
                 </Link>
 
             </div>
@@ -242,21 +260,45 @@ export default function ProductCard({ product, className, hideAddToCart, height,
 
 
             {/* ---------------- CONTENT (GROWS) ---------------- */}
-            <div className="relative z-10 flex flex-col flex-1 p-4 sm:p-5 gap-3">
+            <div className="relative z-10 flex flex-col flex-1 p-4 sm:p-5 gap-2.5">
 
 
                 {/* Title */}
                 <div>
 
-                    <h3 className="font-semibold text-base sm:text-lg text-zinc-900 dark:text-white leading-snug line-clamp-2">
+                    <h3 className={cn(
+                        "font-semibold text-base sm:text-lg text-zinc-900 dark:text-white leading-snug",
+                        !isBike && accessoryChips.length > 0 ? "line-clamp-1" : "line-clamp-2"
+                    )}>
                         {product?.name}
                     </h3>
 
-                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                        {product?.brand}
-                    </span>
+                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 truncate">
+                            {isBike ? product?.brand : product?.brand || product?.sub_category}
+                        </span>
+                        {!isBike && product?.model_no && (
+                            <span className="text-[11px] font-mono text-zinc-400 shrink-0">
+                                {product.model_no}
+                            </span>
+                        )}
+                    </div>
 
                 </div>
+
+                {/* Dynamic Accessory Attribute Chips */}
+                {!isBike && accessoryChips.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                        {accessoryChips.map((chip) => (
+                            <span
+                                key={chip}
+                                className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
+                            >
+                                {chip}
+                            </span>
+                        ))}
+                    </div>
+                )}
 
 
                 <div className="flex items-start justify-between gap-4">

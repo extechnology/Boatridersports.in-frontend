@@ -63,6 +63,11 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
     // Accessory search & Sort state
     const isAccessories = type === "accessories";
     const sortBy = searchParams.get("special_tag") || "All";
+    const defaultSpecialTags = ["Best Seller", "New Arrival", "Trending", "Limited"];
+    const availableSpecialTags =
+        filterData?.special_tags && filterData.special_tags.length > 0
+            ? Array.from(new Set([...filterData.special_tags, ...defaultSpecialTags]))
+            : defaultSpecialTags;
     const urlSearchName = searchParams.get("name") || "";
     const [searchInputState, setSearchInputState] = useState({
         syncedName: urlSearchName,
@@ -342,19 +347,21 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
 
                             <Select value={sortBy} onValueChange={handleSortChange}>
 
-                                <SelectTrigger className="w-40 h-11 rounded-full border-zinc-200 bg-transparent">
+                                <SelectTrigger className="w-36 sm:w-40 h-11 rounded-full border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 cursor-pointer shadow-xs">
 
                                     <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide">
-                                        <ArrowUpDown className="w-3 h-3" />
-                                        Sort
+                                        <ArrowUpDown className="w-3 h-3 text-zinc-500 shrink-0" />
+                                        <SelectValue placeholder="SORT">
+                                            {sortBy === "All" ? "SORT" : sortBy}
+                                        </SelectValue>
                                     </span>
 
                                 </SelectTrigger>
 
-                                <SelectContent>
+                                <SelectContent position="popper" align="end" sideOffset={6} className="z-50 min-w-44">
 
                                     <SelectItem value="All">All</SelectItem>
-                                    {filterData?.special_tags?.map(option => (
+                                    {availableSpecialTags.map(option => (
                                         <SelectItem key={option} value={option}>
                                             {option}
                                         </SelectItem>
@@ -514,12 +521,14 @@ export default function ShopClient({ products, type, totalCount, currentPage, to
                             <div className="hidden lg:flex items-center gap-3 shrink-0">
                                 <span className="text-sm font-medium text-zinc-500">Sort by:</span>
                                 <Select value={sortBy} onValueChange={handleSortChange} >
-                                    <SelectTrigger className="w-45 bg-transparent border-zinc-200 dark:border-zinc-800 rounded-full">
-                                        <SelectValue placeholder="Featured" />
+                                    <SelectTrigger className="w-45 bg-transparent border-zinc-200 dark:border-zinc-800 rounded-full cursor-pointer">
+                                        <SelectValue placeholder="Featured">
+                                            {sortBy === "All" ? "Featured" : sortBy}
+                                        </SelectValue>
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent position="popper" align="end" sideOffset={6} className="z-50 min-w-45">
                                         <SelectItem value="All">All</SelectItem>
-                                        {filterData?.special_tags?.map(option => (
+                                        {availableSpecialTags.map(option => (
                                             <SelectItem key={option} value={option}>
                                                 {option}
                                             </SelectItem>

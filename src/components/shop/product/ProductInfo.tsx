@@ -326,7 +326,7 @@ export function ProductInfo({
 
                                 return (
                                     <button
-                                        key={color.color}
+                                        key={`${color.color || "color"}-${index}`}
                                         onClick={() => setSelectedColorIndex(index)}
                                         className={cn(
                                             "relative w-12 h-12 rounded-full transition-all duration-300 hover:cursor-pointer",

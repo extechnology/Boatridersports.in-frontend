@@ -144,8 +144,8 @@ export default function ProductClient({ product }: Props) {
                     {/* Reviews */}
                     <ProductReviews
                         reviews={[]}
-                        rating={4.8}
-                        reviewCount={124}
+                        rating={0}
+                        reviewCount={0}
                     />
 
 

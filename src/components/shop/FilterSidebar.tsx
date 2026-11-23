@@ -137,7 +137,7 @@ const CheckboxFilterList = ({
                 </div>
             )}
 
-            <div className={cn("space-y-2.5", options.length > 7 && "max-h-52 overflow-y-auto pr-1")}>
+            <div className="space-y-2.5">
                 {filteredOptions.length === 0 ? (
                     <p className="text-xs text-zinc-400 py-1">No matches found</p>
                 ) : (

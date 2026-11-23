@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, Route, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
-import { CyclingEvent } from "@/data/eventsData";
+import { CyclingEvent } from "@/service/events/EventsApi";
 
 interface EventCardProps {
     event: CyclingEvent;
@@ -12,8 +12,10 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, onRegister, index }: EventCardProps) {
-    const fillPercent = Math.min(Math.round((event.filledSpots / event.maxSpots) * 100), 100);
-    const spotsLeft = event.maxSpots - event.filledSpots;
+    const maxSpots = event.maxSpots ?? 50;
+    const filledSpots = event.filledSpots ?? 0;
+    const fillPercent = Math.min(Math.round((filledSpots / maxSpots) * 100), 100);
+    const spotsLeft = Math.max(0, maxSpots - filledSpots);
 
     const getCategoryColor = (category: string) => {
         switch (category) {
@@ -121,17 +123,19 @@ export default function EventCard({ event, onRegister, index }: EventCardProps) 
                     </div>
 
                     {/* Highlights */}
-                    <div className="pt-1 flex flex-wrap gap-1.5">
-                        {event.highlights.slice(0, 2).map((h, i) => (
-                            <span
-                                key={i}
-                                className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
-                            >
-                                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                                {h}
-                            </span>
-                        ))}
-                    </div>
+                    {event.highlights && event.highlights.length > 0 && (
+                        <div className="pt-1 flex flex-wrap gap-1.5">
+                            {event.highlights.slice(0, 2).map((h, i) => (
+                                <span
+                                    key={i}
+                                    className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
+                                >
+                                    <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                                    {h}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer Section: Spots Progress & CTA */}

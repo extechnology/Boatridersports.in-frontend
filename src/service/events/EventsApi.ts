@@ -1,5 +1,24 @@
 import { CommonApi } from "@/lib/CommonApi";
 
+export interface CyclingEvent {
+    id: string;
+    title: string;
+    category: 'Community' | 'Trail' | 'Race' | 'Workshop' | string;
+    categoryLabel?: string;
+    tag?: string;
+    date: string;
+    time: string;
+    location: string;
+    distance: string;
+    difficulty: 'All Levels' | 'Beginner Friendly' | 'Intermediate' | 'Advanced' | 'Expert' | string;
+    fee: string;
+    maxSpots?: number;
+    filledSpots?: number;
+    image: string;
+    description: string;
+    highlights?: string[];
+}
+
 export interface EventRegistrationPayload {
     eventId: string;
     eventTitle: string;

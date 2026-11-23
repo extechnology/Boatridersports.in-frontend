@@ -249,3 +249,20 @@ export interface NavbarProductsResponse {
     bikes: NavbarCategory[];
     accessories: NavbarCategory[];
 }
+
+export interface ProductPoster {
+    image: string;
+    title: string;
+    description: string;
+}
+
+export interface Review {
+    id: string;
+    author: string;
+    rating: number;
+    date: string;
+    content: string;
+    title: string;
+    isVerified?: boolean;
+}
+

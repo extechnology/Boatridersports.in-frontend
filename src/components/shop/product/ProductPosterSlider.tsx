@@ -6,7 +6,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ProductPoster } from "@/data/shop-data";
+import { ProductPoster } from "@/types/product";
 
 
 

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Star, CheckCircle2, User, ThumbsUp, PenLine } from "lucide-react";
+import { Star, CheckCircle2, ThumbsUp, PenLine } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Review } from "@/data/shop-data";
+import { Review } from "@/types/product";
 
 
 
@@ -56,44 +56,46 @@ export function ProductReviews({ reviews, rating = 0, reviewCount = 0 }: Product
             <div className="grid grid-cols-1 gap-8 lg:gap-12">
 
 
-                {/* 1. Rating Summary Stats */}
-                <div className="space-y-8">
+                {/* 1. Rating Summary Stats (Only when reviews exist) */}
+                {((reviews && reviews.length > 0) || reviewCount > 0) && (
+                    <div className="space-y-8">
 
 
-                    <div className="flex items-center gap-4 bg-zinc-50 dark:bg-zinc-900/50 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-800">
+                        <div className="flex items-center gap-4 bg-zinc-50 dark:bg-zinc-900/50 p-6 rounded-3xl border border-zinc-100 dark:border-zinc-800">
 
 
-                        <div className="text-center">
-                            <span className="text-5xl font-black text-zinc-900 dark:text-white block">{rating}</span>
-                            <div className="flex gap-0.5 justify-center my-2">
-                                {[1, 2, 3, 4, 5].map((s) => (
-                                    <Star key={s} className={cn("w-4 h-4", s <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-zinc-300 dark:text-zinc-700")} />
+                            <div className="text-center">
+                                <span className="text-5xl font-black text-zinc-900 dark:text-white block">{rating}</span>
+                                <div className="flex gap-0.5 justify-center my-2">
+                                    {[1, 2, 3, 4, 5].map((s) => (
+                                        <Star key={s} className={cn("w-4 h-4", s <= Math.round(rating) ? "fill-yellow-400 text-yellow-400" : "text-zinc-300 dark:text-zinc-700")} />
+                                    ))}
+                                </div>
+                                <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide">{reviewCount} Reviews</p>
+                            </div>
+
+
+                            <div className="h-16 w-px bg-zinc-200 dark:bg-zinc-700 mx-auto" />
+
+
+                            <div className="grow space-y-1.5 min-w-[140px]">
+                                {[5, 4, 3, 2, 1].map((n, idx) => (
+                                    <div key={n} className="flex items-center gap-2 text-xs">
+                                        <span className="font-bold w-3 text-zinc-500">{n}</span>
+                                        <div className="h-1.5 grow bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-zinc-900 dark:bg-white rounded-full"
+                                                style={{ width: `${ratingDistribution[idx] || 0}%` }}
+                                            />
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
-                            <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide">{reviewCount} Reviews</p>
-                        </div>
 
-
-                        <div className="h-16 w-px bg-zinc-200 dark:bg-zinc-700 mx-auto" />
-
-
-                        <div className="grow space-y-1.5 min-w-[140px]">
-                            {[5, 4, 3, 2, 1].map((n, idx) => (
-                                <div key={n} className="flex items-center gap-2 text-xs">
-                                    <span className="font-bold w-3 text-zinc-500">{n}</span>
-                                    <div className="h-1.5 grow bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-zinc-900 dark:bg-white rounded-full"
-                                            style={{ width: `${ratingDistribution[idx] || 0}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
                         </div>
 
                     </div>
-
-                </div>
+                )}
 
 
 

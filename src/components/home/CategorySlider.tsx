@@ -34,13 +34,15 @@ const item: Variants = {
 
 export default function CategorySlider({ data }: { data: ShopBuyType[] }) {
 
-
     const swiperRef = useRef<any>(null);
     const sectionRef = useRef<any>(null);
     const handlePrev = () => swiperRef.current?.slidePrev();
     const handleNext = () => swiperRef.current?.slideNext();
     const inView = useInView(sectionRef, { once: true, amount: 0.3 });
 
+    if (!data || data.length === 0) {
+        return null;
+    }
 
     return (
 

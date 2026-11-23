@@ -95,7 +95,7 @@ export default function AboutClient() {
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.8, delay: 0.5 }}
                     >
-                        We don't just sell bikes we curate freedom. Join a community driven by performance, passion, and the open road.
+                        We don&apos;t just sell bikes we curate freedom. Join a community driven by performance, passion, and the open road.
                     </motion.p>
 
                 </motion.div>
@@ -285,16 +285,16 @@ export default function AboutClient() {
 
                             <motion.div variants={fadeInUp} className="space-y-8">
                                 <p className="text-xl md:text-2xl text-gray-700 italic font-medium leading-relaxed border-l-4 border-red-600 pl-8 py-2">
-                                    "At the heart of Boatrider’s success is a clear vision and strong leadership. We believe that trust is the most valuable asset in any business. From the very beginning, the focus has been on building long-term relationships rather than short-term gains."
+                                    &ldquo;At the heart of Boatrider’s success is a clear vision and strong leadership. We believe that trust is the most valuable asset in any business. From the very beginning, the focus has been on building long-term relationships rather than short-term gains.&rdquo;
                                 </p>
 
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed text-justify">
                                     <p>
-                                        “Over the last 10 years, Boatrider has been driven by one simple principle—deliver the best, without compromise. Every bicycle or bike that carries our name reflects our commitment to quality, safety, and customer satisfaction. We have witnessed the cycling culture grow and evolve, and we are proud to be a part of that journey.”
+                                        &ldquo;Over the last 10 years, Boatrider has been driven by one simple principle—deliver the best, without compromise. Every bicycle or bike that carries our name reflects our commitment to quality, safety, and customer satisfaction. We have witnessed the cycling culture grow and evolve, and we are proud to be a part of that journey.&rdquo;
                                     </p>
 
                                     <p>
-                                        “Our goal is not just to sell products, but to inspire healthier, more active lifestyles and a deeper connection with riding.”
+                                        &ldquo;Our goal is not just to sell products, but to inspire healthier, more active lifestyles and a deeper connection with riding.&rdquo;
                                     </p>
 
                                     <p className="text-gray-900 font-bold italic">
@@ -473,7 +473,7 @@ export default function AboutClient() {
                             <Heart className="w-12 h-12 text-red-600 mb-6" />
                             <h3 className="text-xl font-bold mb-3">Passion Driven</h3>
                             <p className="text-gray-500 group-hover:text-gray-400">
-                                We don't just work here; we ride here. Our passion for cycling drives every recommendation we make.
+                                We don&apos;t just work here; we ride here. Our passion for cycling drives every recommendation we make.
                             </p>
                         </motion.div>
 
@@ -488,7 +488,7 @@ export default function AboutClient() {
                             <Users className="w-12 h-12 text-red-600 mb-6" />
                             <h3 className="text-xl font-bold mb-3">Community Focused</h3>
                             <p className="text-gray-500 group-hover:text-gray-400">
-                                From group rides to charity events, we're committed to building a stronger, healthier cycling community.
+                                From group rides to charity events, we&apos;re committed to building a stronger, healthier cycling community.
                             </p>
                         </motion.div>
 

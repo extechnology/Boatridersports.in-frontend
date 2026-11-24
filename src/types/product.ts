@@ -110,6 +110,7 @@ export interface AccessoryProduct extends Omit<BaseProduct, "brand"> {
     product_type: "accessories";
     model_name?: string | null;
     model_no?: string | null;
+    short_description?: string | null;
     brand?: string | null;
     sub_category: string;
     accessory_images: (string | AccessoryImage)[];

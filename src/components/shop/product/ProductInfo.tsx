@@ -237,6 +237,13 @@ export function ProductInfo({
                                     </span>
                                 )}
                             </div>
+
+                            {/* Short Description (Accessories) */}
+                            {!isbike && (product as AccessoryProduct).short_description && (
+                                <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed pt-1">
+                                    {(product as AccessoryProduct).short_description}
+                                </p>
+                            )}
                         </div>
 
                         {/* Reviews */}

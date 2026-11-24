@@ -53,7 +53,10 @@ export async function generateMetadata({ params, searchParams }: { params: { id:
 
     const title = `Buy ${product.name} Online`;
 
-    const description = product.description.substring(0, 160);
+    const description =
+        (product as AccessoryProduct).short_description ||
+        product.description?.substring(0, 160) ||
+        "";
 
 
     return {

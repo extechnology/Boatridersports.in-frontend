@@ -259,6 +259,11 @@ export default function SearchModal({ open, onOpenChange }: SearchModalProps) {
                                                                         <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 text-xs leading-snug">
                                                                             {product.name}
                                                                         </h3>
+                                                                        {product.product_type === 'accessories' && (product as AccessoryProduct).short_description && (
+                                                                            <p className="text-[11px] text-gray-500 dark:text-zinc-400 line-clamp-1 mt-0.5">
+                                                                                {(product as AccessoryProduct).short_description}
+                                                                            </p>
+                                                                        )}
                                                                     </div>
 
                                                                     <div className="mt-2 flex items-center gap-2 flex-wrap">

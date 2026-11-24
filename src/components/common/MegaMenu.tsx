@@ -30,6 +30,7 @@ interface SubCategory {
         unique_id: string;
         product_type: "bike" | "accessories";
         name: string;
+        short_description?: string | null;
         image: string | null;
         price: number;
         brand: string | null;
@@ -403,6 +404,15 @@ export default function MegaMenu({ activeDropdown, setActiveDropdown, isDark = f
                                                                                 )}>
                                                                                     {item?.name}
                                                                                 </h4>
+
+                                                                                {item?.short_description && (
+                                                                                    <p className={cn(
+                                                                                        "text-[11px] xl:text-xs line-clamp-1 mt-0.5 font-normal",
+                                                                                        isDark ? "text-zinc-400" : "text-gray-500"
+                                                                                    )}>
+                                                                                        {item.short_description}
+                                                                                    </p>
+                                                                                )}
 
 
                                                                                 {item?.price && (

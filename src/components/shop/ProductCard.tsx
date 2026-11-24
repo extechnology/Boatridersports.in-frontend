@@ -280,6 +280,13 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                         )}
                     </div>
 
+                    {/* Short Description (Accessories) */}
+                    {!isBike && (product as AccessoryProduct).short_description && (
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 leading-normal">
+                            {(product as AccessoryProduct).short_description}
+                        </p>
+                    )}
+
                 </div>
 
                 {/* Dynamic Accessory Attribute Chips */}

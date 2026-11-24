@@ -41,12 +41,6 @@ export default function Header() {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
 
-
-  // Bag Count (Mock)
-  const [count, setCount] = useState<number>(2);
-
-
-
   // Handle Scroll Logic
   useEffect(() => {
 

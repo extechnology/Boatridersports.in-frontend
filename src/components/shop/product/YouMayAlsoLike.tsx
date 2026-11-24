@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperType } from "swiper";
 import { Navigation, Autoplay } from "swiper/modules";
 import "swiper/css";
 import { ChevronLeft, ChevronRight, AlertTriangle, RefreshCcw } from "lucide-react";
@@ -16,7 +17,7 @@ import ProductCard from "@/components/shop/ProductCard";
 export function YouMayAlsoLike() {
 
 
-    const swiperRef = useRef<any>(null);
+    const swiperRef = useRef<SwiperType | null>(null);
     const handlePrev = () => swiperRef.current?.slidePrev();
     const handleNext = () => swiperRef.current?.slideNext();
 
@@ -84,6 +85,10 @@ export function YouMayAlsoLike() {
 
 
     /* ---------------- Data ---------------- */
+    if (!suggestedProducts || suggestedProducts.length === 0) {
+        return null;
+    }
+
     return (
 
 

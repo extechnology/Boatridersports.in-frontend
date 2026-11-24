@@ -362,7 +362,7 @@ function LoginContent() {
 
                     {/* Sign Up Link */}
                     <p className="mt-8 text-center text-sm text-gray-600">
-                        Don't have an account?{' '}
+                        Don&apos;t have an account?{' '}
                         <Link href="/account/register" className="font-semibold text-gray-900 hover:text-gray-700">
                             Sign up for free
                         </Link>

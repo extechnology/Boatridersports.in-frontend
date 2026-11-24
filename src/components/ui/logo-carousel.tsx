@@ -129,17 +129,13 @@ const LogoColumn: React.FC<LogoColumnProps> = React.memo(
 LogoColumn.displayName = "LogoColumn"
 
 function LogoCarousel({ columnCount = 6, data }: { columnCount?: number; data: string[] }) {
-  const [logoSets, setLogoSets] = useState<Logo[][]>([])
+  const logoSets = useMemo(() => {
+    if (!data || data.length === 0) return [];
+    const allLogos: Logo[] = data.map((logo, index) => ({ name: logo, id: index + 1, img: logo }));
+    return distributeLogos(allLogos, columnCount);
+  }, [data, columnCount]);
 
-  const allLogos: Logo[] = useMemo(
-    () => data.map((logo, index) => ({ name: logo, id: index + 1, img: logo })),
-    [data]
-  )
-
-  useEffect(() => {
-    const distributedLogos = distributeLogos(allLogos, columnCount)
-    setLogoSets(distributedLogos)
-  }, [allLogos, columnCount])
+  if (logoSets.length === 0) return null;
 
   return (
     <div className="flex space-x-4 p-8">

@@ -33,12 +33,12 @@ export default function ProductGrid({ products }: { products: (BikeProduct | Acc
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-5 sm:gap-6"
         >
 
             {products.map(product => (
                 <motion.div layout key={`${product.product_type}-${product.unique_id}`} variants={item}>
-                    <ProductCard product={product} height="h-[520px] sm:h-[535px]" />
+                    <ProductCard product={product} height="h-[490px] sm:h-[520px]" />
                 </motion.div>
             ))}
 

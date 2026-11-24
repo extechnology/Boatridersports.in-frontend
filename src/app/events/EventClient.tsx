@@ -8,8 +8,9 @@ import HeroSlider from "@/components/events/HeroSlider";
 import CountUp from "@/components/events/CountUp";
 import EventCard from "@/components/events/EventCard";
 import EventRegisterModal from "@/components/events/EventRegisterModal";
-import { EVENTS_DATA, CyclingEvent } from "@/data/eventsData";
+import { CyclingEvent } from "@/service/events/EventsApi";
 import { useEventsList } from "@/service/events/useEvents";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function EventsPage() {
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -17,14 +18,14 @@ export default function EventsPage() {
     const [selectedEventForModal, setSelectedEventForModal] = useState<CyclingEvent | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Fetch dynamic events from backend with fallback
-    const { data: apiEventsResponse } = useEventsList();
+    // Fetch dynamic events from backend
+    const { data: apiEventsResponse, isLoading, isError, refetch } = useEventsList();
     const allEvents: CyclingEvent[] =
         Array.isArray(apiEventsResponse) && apiEventsResponse.length > 0
             ? apiEventsResponse
             : Array.isArray(apiEventsResponse?.data) && apiEventsResponse.data.length > 0
             ? apiEventsResponse.data
-            : EVENTS_DATA;
+            : [];
 
     const handleOpenRegister = (event: CyclingEvent) => {
         setSelectedEventForModal(event);
@@ -46,7 +47,13 @@ export default function EventsPage() {
             subtitle: "Join our community rides, races, and workshops across Kerala",
             cta: {
                 text: "Register Now",
-                action: () => handleOpenRegister(EVENTS_DATA[0]),
+                action: () => {
+                    if (allEvents[0]) {
+                        handleOpenRegister(allEvents[0]);
+                    } else {
+                        scrollToEvents();
+                    }
+                },
             },
         },
         {
@@ -183,8 +190,8 @@ export default function EventsPage() {
                                 const isSelected = selectedCategory === cat.key;
                                 const count =
                                     cat.key === "All"
-                                        ? EVENTS_DATA.length
-                                        : EVENTS_DATA.filter((e) => e.category === cat.key).length;
+                                        ? allEvents.length
+                                        : allEvents.filter((e) => e.category === cat.key).length;
 
                                 return (
                                     <button
@@ -214,7 +221,32 @@ export default function EventsPage() {
                     </div>
 
                     {/* Events Grid */}
-                    {filteredEvents.length > 0 ? (
+                    {isLoading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                            {[1, 2, 3, 4, 5, 6].map((i) => (
+                                <div key={i} className="rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-4">
+                                    <Skeleton className="h-52 w-full rounded-2xl" />
+                                    <Skeleton className="h-4 w-1/3" />
+                                    <Skeleton className="h-6 w-3/4" />
+                                    <Skeleton className="h-12 w-full rounded-xl" />
+                                </div>
+                            ))}
+                        </div>
+                    ) : isError ? (
+                        <div className="py-16 text-center bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 p-8 space-y-4">
+                            <p className="text-lg font-bold text-red-600">Failed to load events</p>
+                            <p className="text-sm text-zinc-500 max-w-md mx-auto">
+                                We couldn&apos;t connect to the server to fetch the latest cycling events.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => refetch()}
+                                className="px-6 py-2 rounded-full bg-red-600 text-white text-xs font-bold uppercase tracking-wider hover:bg-red-700 transition"
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : filteredEvents.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                             {filteredEvents.map((event, index) => (
                                 <EventCard
@@ -228,21 +260,25 @@ export default function EventsPage() {
                     ) : (
                         <div className="py-20 text-center bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 p-8 space-y-4">
                             <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                                No events found matching your filter
+                                {allEvents.length === 0 ? "No upcoming events scheduled" : "No events found matching your filter"}
                             </p>
                             <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-                                Try adjusting your search query or selecting a different category.
+                                {allEvents.length === 0
+                                    ? "Check back soon for new community rides, races, and technical workshops!"
+                                    : "Try adjusting your search query or selecting a different category."}
                             </p>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setSelectedCategory("All");
-                                    setSearchQuery("");
-                                }}
-                                className="px-6 py-2 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-bold uppercase tracking-wider hover:bg-red-600 dark:hover:bg-red-600 dark:hover:text-white transition"
-                            >
-                                Reset Filters
-                            </button>
+                            {allEvents.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedCategory("All");
+                                        setSearchQuery("");
+                                    }}
+                                    className="px-6 py-2 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-bold uppercase tracking-wider hover:bg-red-600 dark:hover:bg-red-600 dark:hover:text-white transition"
+                                >
+                                    Reset Filters
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

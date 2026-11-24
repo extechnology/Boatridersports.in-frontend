@@ -450,7 +450,7 @@ function RegisterContent() {
                                     </form>
 
                                     <div className="mt-8 text-center">
-                                        <p className="text-sm text-gray-600 mb-4">Didn't receive the code?</p>
+                                        <p className="text-sm text-gray-600 mb-4">Didn&apos;t receive the code?</p>
                                         <button
                                             onClick={handleResendOtp}
                                             disabled={resendOtpMutation.isPending}

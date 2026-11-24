@@ -56,7 +56,7 @@ const SOCIAL_LINKS = [
 // Quick Links
 const QUICK_LINKS = [
   { name: 'Home', href: '/' },
-  { name: 'Bikes', href: '/shop/bikes' },
+  { name: 'Bikes', href: '/shop/bike' },
   { name: 'Accessories', href: '/shop/accessories' },
   { name: 'About Us', href: '/about' },
   { name: 'Events', href: '/events' },
@@ -237,7 +237,17 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 border-t border-white/5 pt-8">
           <p>&copy; {new Date().getFullYear()} BoatRider Inc. All Rights Reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <span>Designed by ex-technology</span>
+            <span>
+              Designed by{' '}
+              <a
+                href="https://extechnology.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors underline-offset-4 hover:underline"
+              >
+                extechnology
+              </a>
+            </span>
           </div>
         </div>
 

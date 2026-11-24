@@ -2,10 +2,10 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, Loader2, AlertCircle } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, AlertCircle } from 'lucide-react';
 import AuthProtectedRoute from '@/components/common/AuthProtectedRoute';
 import { useGetCartList, useUpdateCartItem, useDeleteCartItem, useDeleteAllCartItems } from '@/service/cart/useCart';
-import { CartProduct } from '@/service/cart/types';
+import { CartProduct, CartItemColor } from '@/service/cart/types';
 import { getCartItemPricing, isVariantOutOfStock } from '@/lib/productPricing';
 import { extractImageUrl } from '@/lib/orderUtils';
 import ProductLoading from '../loading';
@@ -363,10 +363,10 @@ function CartContent() {
 
                                                                             {item.color && <option value={item.color.color}>{item.color.color || `Color ${item.color.id}`}</option>}
 
-                                                                            {item.bike.bike_colors?.map((colorObj: any) => {
-                                                                                const colorId = typeof colorObj === 'object' ? colorObj.id : colorObj;
-                                                                                const colorValue = typeof colorObj === 'object' ? (colorObj.color || colorObj.name) : colorObj.toString();
-                                                                                const colorLabel = typeof colorObj === 'object' ? (colorObj.color || colorObj.name) : `Color ${colorObj}`;
+                                                                            {item.bike.bike_colors?.map((colorObj: CartItemColor, idx: number) => {
+                                                                                const colorId = colorObj.id ?? `${colorObj.color || colorObj.color_name || "color"}-${idx}`;
+                                                                                const colorValue = colorObj.color || colorObj.color_name || "";
+                                                                                const colorLabel = colorObj.color || colorObj.color_name || `Color ${colorId}`;
                                                                                 if (colorValue === item?.color?.color) return null;
                                                                                 return <option key={colorId} value={colorValue}>{colorLabel}</option>;
                                                                             })}

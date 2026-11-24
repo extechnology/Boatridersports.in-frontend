@@ -117,7 +117,7 @@ export default function Error({
                 </h1>
 
                 <p className="text-zinc-600 dark:text-zinc-400 max-w-md mx-auto mb-10">
-                    Oops! Something went wrong while loading this page. Let's get you back on track.
+                    Oops! Something went wrong while loading this page. Let&apos;s get you back on track.
                 </p>
 
 

@@ -160,11 +160,10 @@ export default function ProductCard({ product, className, hideAddToCart, height,
             transition={{ duration: 0.4 }}
             className={cn(
                 "group relative flex flex-col", // 🔑 flex column
-                "bg-white dark:bg-black rounded-2xl overflow-hidden",
+                "bg-white dark:bg-zinc-950 rounded-2xl overflow-hidden",
                 "border border-zinc-200 dark:border-zinc-800",
                 "hover:shadow-xl hover:-translate-y-1 transition-all duration-300",
-                "h-130", // 🔑 consistent height
-                height,
+                height || "h-[490px] sm:h-[520px]",
                 className
             )}
         >
@@ -224,8 +223,8 @@ export default function ProductCard({ product, className, hideAddToCart, height,
             {/* ---------------- Image ---------------- */}
             <div
                 className={cn(
-                    "relative overflow-hidden",
-                    isBike ? "h-80" : "h-72 bg-zinc-50 dark:bg-zinc-900/60"
+                    "relative overflow-hidden bg-white dark:bg-zinc-900/40 flex items-center justify-center shrink-0",
+                    isBike ? "h-60 sm:h-68 lg:h-72" : "h-56 sm:h-64 lg:h-72 bg-zinc-50 dark:bg-zinc-900/60"
                 )}
                 onMouseEnter={() => setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
@@ -233,20 +232,17 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                 <Link
                     href={`/product/${product.unique_id}?type=${product.product_type}`}
                     aria-label={product.name}
-                    className="block w-full h-full"
+                    className="relative block w-full h-full"
                 >
                     {images[0] ? (
                         <motion.img
                             key={hovered && images[1] ? images[1] : images[0]}
                             src={hovered && images[1] ? images[1] : images[0]}
                             alt={product.name}
-                            className={cn(
-                                "absolute inset-0 w-full h-full",
-                                isBike ? "object-cover" : "object-contain p-4"
-                            )}
-                            initial={{ opacity: 0.6, scale: 1.04 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0 w-full h-full object-contain p-3 sm:p-4 transition-transform duration-300 group-hover:scale-105"
+                            initial={{ opacity: 0.7 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
                         />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-xs font-medium text-zinc-400">
@@ -284,14 +280,21 @@ export default function ProductCard({ product, className, hideAddToCart, height,
                         )}
                     </div>
 
+                    {/* Short Description (Accessories) */}
+                    {!isBike && (product as AccessoryProduct).short_description && (
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1 leading-normal">
+                            {(product as AccessoryProduct).short_description}
+                        </p>
+                    )}
+
                 </div>
 
                 {/* Dynamic Accessory Attribute Chips */}
                 {!isBike && accessoryChips.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
-                        {accessoryChips.map((chip) => (
+                        {accessoryChips.map((chip, idx) => (
                             <span
-                                key={chip}
+                                key={`${chip}-${idx}`}
                                 className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
                             >
                                 {chip}
@@ -331,27 +334,33 @@ export default function ProductCard({ product, className, hideAddToCart, height,
 
                     {/* Colors (Bike only) */}
                     {!hideAddToCart && isBike && (
-                        <div className="flex items-center gap-2 pt-0.5 shrink-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 pt-0.5 shrink-0">
                             {product?.bike_colors?.map((color, index) => {
                                 const [topColor, bottomColor] = color.color_code;
                                 const isSelected = index === selectedColorIndex;
 
                                 return (
                                     <button
-                                        key={color.color}
+                                        key={`${color.color || "color"}-${index}`}
                                         type="button"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setSelectedColorIndex(index);
+                                        }}
                                         onMouseEnter={() => setSelectedColorIndex(index)}
                                         className={cn(
-                                            "w-6 h-6 rounded-full border transition",
+                                            "w-5 h-5 sm:w-6 sm:h-6 rounded-full border transition cursor-pointer",
                                             isSelected
-                                                ? "ring-2 ring-black dark:ring-white"
-                                                : "border-zinc-300 dark:border-zinc-700"
+                                                ? "ring-2 ring-black dark:ring-white scale-110"
+                                                : "border-zinc-300 dark:border-zinc-700 hover:scale-105"
                                         )}
                                         style={{
                                             background: bottomColor
                                                 ? `linear-gradient(to bottom, ${topColor} 50%, ${bottomColor} 50%)`
                                                 : topColor,
                                         }}
+                                        aria-label={color.color || `Color ${index + 1}`}
                                     />
                                 );
                             })}

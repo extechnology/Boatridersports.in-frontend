@@ -110,6 +110,7 @@ export interface AccessoryProduct extends Omit<BaseProduct, "brand"> {
     product_type: "accessories";
     model_name?: string | null;
     model_no?: string | null;
+    short_description?: string | null;
     brand?: string | null;
     sub_category: string;
     accessory_images: (string | AccessoryImage)[];
@@ -249,3 +250,20 @@ export interface NavbarProductsResponse {
     bikes: NavbarCategory[];
     accessories: NavbarCategory[];
 }
+
+export interface ProductPoster {
+    image: string;
+    title: string;
+    description: string;
+}
+
+export interface Review {
+    id: string;
+    author: string;
+    rating: number;
+    date: string;
+    content: string;
+    title: string;
+    isVerified?: boolean;
+}
+

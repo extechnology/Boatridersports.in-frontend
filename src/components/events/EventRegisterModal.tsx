@@ -26,7 +26,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CyclingEvent } from "@/data/eventsData";
+import { CyclingEvent } from "@/service/events/EventsApi";
 import { useRegisterEvent } from "@/service/events/useEvents";
 
 // Zod validation schema
@@ -231,9 +231,11 @@ export default function EventRegisterModal({ event, isOpen, onClose }: EventRegi
                                     Please enter your contact and riding details to secure your spot.
                                 </p>
                             </div>
-                            <span className="hidden sm:inline-block text-xs font-semibold px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
-                                {event.maxSpots - event.filledSpots} spots left
-                            </span>
+                            {event.maxSpots != null && event.filledSpots != null && (
+                                <span className="hidden sm:inline-block text-xs font-semibold px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                                    {Math.max(0, event.maxSpots - event.filledSpots)} spots left
+                                </span>
+                            )}
                         </div>
 
                         {/* Grid 1: Personal Contact Info (2 Columns) */}
